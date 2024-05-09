@@ -4,8 +4,8 @@ interface TextSectionProps {
 
 export default function TextSection({text}: TextSectionProps) {
     return (
-        <textarea className="overflow-y-auto min-h-full flex-[4] text-wrap border-2 rounded-md p-3 border-base-300 resize-none">
-            {text}
+        <textarea className="overflow-y-auto flex-1 w-full mb-3 text-wrap border-2 rounded-md p-3 border-base-300 resize-none">
+            {text.replace(/\n{2,}/g, '\n').trim()}
         </textarea>
     );
 }

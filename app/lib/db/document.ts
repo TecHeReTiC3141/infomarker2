@@ -21,3 +21,18 @@ export async function createDocument(data: createDocumentData) {
     });
     return id;
 }
+
+export async function getDocumentById(id: number) {
+    const session = await getServerSession(authOptions) as Session;
+    const user = session.user;
+
+    const document = await prisma.document.findUnique({
+        where: {
+            id,
+        }
+    });
+    if (!document || document.userId !== user.id) {
+        throw new Error("Документ не найден");
+    }
+    return document;
+}
