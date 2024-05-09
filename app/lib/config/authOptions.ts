@@ -25,6 +25,8 @@ export const authOptions: NextAuthOptions = {
                     type: "password",
                 },
             },
+
+            // TODO: fix type errors
             async authorize(credentials) {
                 if (!credentials || !credentials.email || !credentials.password) {
                     return null;

@@ -20,7 +20,7 @@ export default function UserDropdown() {
             <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button"
                      className="btn btn-ghost btn-circle avatar flex items-center justify-center">
-                    <UserAvatar user={user} width={75} height={75}/>
+                    <UserAvatar user={user} width={75} height={50}/>
                 </div>
                 <ul tabIndex={0}
                     className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
