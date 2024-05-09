@@ -1,7 +1,7 @@
-
 import pdfjsLib from "pdfjs-dist";
 import { TextContent } from "pdfjs-dist/types/web/text_layer_builder";
 import mammoth from "mammoth";
+import { createDocument } from "@/app/lib/db/document";
 
 // export function fileToBase64(file: File): Promise<string> {
 //     return new Promise((resolve, reject) => {
@@ -109,14 +109,16 @@ interface FileExtensionHandlers {
 export async function extractTextFromFile(file: File) {
     const extension = file.name.split(".").at(-1);
 
-    const fileHandlers: {[key in keyof FileExtensionHandlers]: FileExtensionHandlers[key]} = {
+    const fileHandlers: { [key in keyof FileExtensionHandlers]: FileExtensionHandlers[key] } = {
         txt: readTextFromTXT,
         pdf: readTextFromPDF,
         doc: readTextFromDocx,
         docx: readTextFromDocx,
     };
 
-    const handler = fileHandlers[extension as keyof FileExtensionHandlers];
+    const handler = fileHandlers[ extension as keyof FileExtensionHandlers ];
 
-    return await handler(file);
+    const text = await handler(file);
+
+    return await createDocument({ filename: file.name, text });
 }

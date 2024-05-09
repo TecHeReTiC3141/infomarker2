@@ -1,16 +1,16 @@
 import { getTextById } from "@/app/app/load-document/actions";
-import TextSection from "@/app/(loadDocument)/[documentId]/TextSection";
+import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 
 interface DocumentPageProps {
     params: {
-        documentId: string,
+        reportId: string,
     }
 }
 
-export default async function DocumentPage({ params: { documentId } }: DocumentPageProps) {
+export default async function DocumentPage({ params: { reportId } }: DocumentPageProps) {
 
-    const fileText = await getTextById(documentId);
+    const fileText = await getTextById(reportId);
 
     return (
         <div className="w-full min-h-full pb-4 flex justify-between gap-x-6">

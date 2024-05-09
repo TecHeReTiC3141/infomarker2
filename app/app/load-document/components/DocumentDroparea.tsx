@@ -5,6 +5,7 @@ import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import FileIcon from "@/app/app/load-document/components/FileIcon";
 import { FadeLoader } from "react-spinners";
 import {extractTextFromFile} from "@/app/utils/handleUploads";
+import { useRouter } from "next/navigation";
 
 
 export default function DocumentDroparea() {
@@ -18,6 +19,8 @@ export default function DocumentDroparea() {
     const [ isDragEntered, setIsDragEntered ] = useState<boolean>(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const router = useRouter();
 
     function validateFile(file: File): void {
         const fileTypes = [ "application/msword", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf" ];
@@ -65,8 +68,8 @@ export default function DocumentDroparea() {
         if (!file) return;
         setIsLoading(true);
         try {
-            const text = await extractTextFromFile(file);
-            console.log(text);
+            const newDocId = await extractTextFromFile(file);
+            router.push(`/app/reports/${newDocId}`);
         } catch (err) {
             setError((err as Error).message);
         }
