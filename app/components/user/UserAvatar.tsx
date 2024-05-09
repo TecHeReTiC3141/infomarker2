@@ -14,7 +14,7 @@ export default function UserAvatar({user, width, height}: UserAvatarProps) {
             {user?.image ? <Image className="rounded-full object-cover"
                                   style={{width, height}}
                                   src={user?.image} alt={user?.name || ""}
-                                  width={160} height={160}/> : <FaUser className="text-xl"/>}
+                                  width={160} height={160}/> : <FaUser className="text-xl text-neutral"/>}
         </>
     )
 }
