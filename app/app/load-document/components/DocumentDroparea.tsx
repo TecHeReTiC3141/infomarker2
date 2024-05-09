@@ -2,7 +2,7 @@
 
 import { FaPlus } from "react-icons/fa6";
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
-import FileIcon from "@/app/(loadDocument)/components/FileIcon";
+import FileIcon from "@/app/app/load-document/components/FileIcon";
 import { FadeLoader } from "react-spinners";
 import {extractTextFromFile} from "@/app/utils/handleUploads";
 

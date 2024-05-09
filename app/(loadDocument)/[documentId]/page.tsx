@@ -1,4 +1,4 @@
-import { getTextById } from "@/app/(loadDocument)/actions";
+import { getTextById } from "@/app/app/load-document/actions";
 import TextSection from "@/app/(loadDocument)/[documentId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 

@@ -1,10 +1,10 @@
-import DocumentDroparea from "@/app/(loadDocument)/components/DocumentDroparea";
+import DocumentDroparea from "@/app/app/load-document/components/DocumentDroparea";
 import { GrCircleInformation } from "react-icons/gr";
 
 
 export default function Home() {
     return (
-        <div className="">
+        <div className="w-full">
             <DocumentDroparea/>
             <div className="rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center w-1/2 mt-6 p-3 text-sm">
                 <GrCircleInformation size={40}/>
