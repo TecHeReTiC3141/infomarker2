@@ -12,7 +12,7 @@ export interface SectionButtonProps {
 export default function SectionButton({ text, section }: SectionButtonProps) {
     const pathname = usePathname();
 
-    const isActive = pathname.endsWith(section);
+    const isActive = pathname.includes(section);
 
     return (
         <Link href={`/app/${section}`}

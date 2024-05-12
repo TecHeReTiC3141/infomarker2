@@ -3,6 +3,7 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
+import { Document } from "@prisma/client";
 
 interface createDocumentData {
     filename: string;
@@ -32,7 +33,15 @@ export async function getDocumentById(id: number) {
         }
     });
     if (!document || document.userId !== user.id) {
-        throw new Error("Документ не найден");
+        return null;
     }
     return document;
+}
+
+export async function getUserReports(userId: number): Promise<Document[]> {
+    return await prisma.document.findMany({
+        where: {
+            userId,
+        }
+    });
 }

@@ -12,8 +12,7 @@ export interface UserCredentials {
 
 export type SessionUser =
     {
-        id: string,
-        description: string | null,
+        id: number,
     } & {
     name?: string | null | undefined,
     email?: string | null | undefined,

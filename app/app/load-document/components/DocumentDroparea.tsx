@@ -88,7 +88,7 @@ export default function DocumentDroparea() {
                  onDrop={handleDrop}>
                 {isLoading ? <FadeLoader color="#777" loading={isLoading} height={31} width={6} margin={30}
                                          aria-label="Loading spinner"/> : file ?
-                    <FileIcon file={file} clearFile={() => setFile(null)}/>
+                    <FileIcon filename={file.name} clearFile={() => setFile(null)}/>
                     : <>
                         <FaPlus size={80} onDragEnter={event => event.preventDefault()}/>
                         <p className="text-xs text-center select-none">{isDragEntered ? "Отпустите для загрузки" :
