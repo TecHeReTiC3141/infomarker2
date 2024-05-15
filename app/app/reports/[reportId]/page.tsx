@@ -4,6 +4,8 @@ import { getReportById } from "@/app/lib/db/report";
 import { MdErrorOutline } from "react-icons/md";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import Link from "next/link";
+import { getReportOccurrences } from "@/app/app/reports/actions";
+import FoundAgentsInfo from "@/app/app/reports/[reportId]/FoundAgentsInfo";
 
 
 interface DocumentPageProps {
@@ -14,9 +16,11 @@ interface DocumentPageProps {
 
 export default async function DocumentPage({ params: { reportId } }: DocumentPageProps) {
 
-    const document = await getReportById(+reportId);
+    const report = await getReportById(+reportId);
 
-    if (!document) {
+    const occurrences = await getReportOccurrences(+reportId);
+
+    if (!report) {
         return (
             <div className="alert alert-error h-16" role="alert">
                 <MdErrorOutline size={36}/>
@@ -31,8 +35,8 @@ export default async function DocumentPage({ params: { reportId } }: DocumentPag
                 <Link href="/app/reports" className="flex gap-x-2 text-sm items-center hover:underline">
                     <FaArrowLeftLong size={16}/> Назад
                 </Link>
-                <h3 className="text-xl font-bold">Отчет по файлу {document.filename}</h3>
-                <TextSection text={document.text}/>
+                <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
+                <TextSection text={report.text} occurrences={occurrences}/>
             </div>
             <div className="flex-[2] min-w-72">
                 <div className="w-full rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center w-1/2 p-3 text-sm">
@@ -44,6 +48,7 @@ export default async function DocumentPage({ params: { reportId } }: DocumentPag
                 </div>
                 <div className="mt-10">
                     <h4 className="text-xl font-bold">Обнаруженные упоминания</h4>
+                    <FoundAgentsInfo />
                 </div>
             </div>
         </div>
