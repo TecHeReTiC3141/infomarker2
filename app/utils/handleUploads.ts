@@ -1,7 +1,7 @@
 import pdfjsLib from "pdfjs-dist";
 import { TextContent } from "pdfjs-dist/types/web/text_layer_builder";
 import mammoth from "mammoth";
-import { createDocument } from "@/app/lib/db/document";
+import { createReport } from "@/app/lib/db/report";
 
 // export function fileToBase64(file: File): Promise<string> {
 //     return new Promise((resolve, reject) => {
@@ -120,5 +120,5 @@ export async function extractTextFromFile(file: File) {
 
     const text = await handler(file);
 
-    return await createDocument({ filename: file.name, text });
+    return await createReport({ filename: file.name, text });
 }

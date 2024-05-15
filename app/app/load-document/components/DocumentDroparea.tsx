@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import FileIcon from "@/app/app/load-document/components/FileIcon";
 import { FadeLoader } from "react-spinners";
-import {extractTextFromFile} from "@/app/utils/handleUploads";
+import { extractTextFromFile } from "@/app/utils/handleUploads";
 import { useRouter } from "next/navigation";
 
 
@@ -72,8 +72,9 @@ export default function DocumentDroparea() {
             router.push(`/app/reports/${newDocId}`);
         } catch (err) {
             setError((err as Error).message);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
 
     }
 

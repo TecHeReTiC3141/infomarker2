@@ -1,4 +1,4 @@
-import { getUserReports } from "@/app/lib/db/document";
+import { getUserReports } from "@/app/lib/db/report";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
 import { SessionUser } from "@/app/lib/db/user";
