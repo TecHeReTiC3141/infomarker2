@@ -19,6 +19,7 @@ export default function TextSection({ text, occurrences }: TextSectionProps) {
     useEffect(() => {
         const marks = sectionRef.current?.querySelectorAll("mark") || [];
         for (let mark of marks) {
+            mark.classList.add("rounded");
             occurLoop:
             for (let occurrence of (occurrences || [])) {
                 const {foreignAgent} = occurrence;

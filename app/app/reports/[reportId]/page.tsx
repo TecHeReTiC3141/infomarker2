@@ -48,7 +48,7 @@ export default async function DocumentPage({ params: { reportId } }: DocumentPag
                 </div>
                 <div className="mt-10">
                     <h4 className="text-xl font-bold">Обнаруженные упоминания</h4>
-                    <FoundAgentsInfo />
+                    <FoundAgentsInfo occurrences={occurrences} />
                 </div>
             </div>
         </div>
