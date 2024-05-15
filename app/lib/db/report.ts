@@ -11,6 +11,19 @@ interface createReportData {
     text: string;
 }
 
+function countOccurrences(mainStr: string, subStr: string) {
+    // Escape special characters in the substring and create a regular expression
+    const escapedSubStr = subStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedSubStr, 'g');
+
+    // Use match() with the regular expression to find all occurrences
+    const matches = mainStr.match(regex);
+
+    // Return the number of matches found
+    return matches ? matches.length : 0;
+}
+
+
 export async function createReport(data: createReportData) {
 
     const session = await getServerSession(authOptions) as Session;
@@ -25,18 +38,20 @@ export async function createReport(data: createReportData) {
     });
     const lowered = data.text.toLowerCase();
     for (let agent of foreignAgents) {
+        let occurCount = 0;
         for (let variant of agent.variants) {
-            if (lowered.includes(variant)) {
-                await prisma.agentOccurance.create({
-                    data: {
-                        reportId: id,
-                        foreignAgentId: agent.id,
-                        color: generateRandomHexColor(),
-                    }
-                });
-                console.log(`${agent.name} found`);
-                break;
-            }
+            occurCount += countOccurrences(lowered, variant);
+        }
+        if (occurCount > 0) {
+            await prisma.agentOccurance.create({
+                data: {
+                    reportId: id,
+                    foreignAgentId: agent.id,
+                    color: generateRandomHexColor(),
+                    count: occurCount,
+                }
+            });
+            console.log(`${agent.name} found`);
         }
     }
     return id;

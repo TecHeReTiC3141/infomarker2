@@ -82,7 +82,7 @@ model VerificationRequest {
     @@map("verification_requests")
 }
 
-model Report {
+model ReportSection {
     id             Int              @id @default(autoincrement())
     filename       String
     text           String
@@ -115,6 +115,7 @@ model ForeignAgent {
 model AgentOccurance {
     id             Int          @id @default(autoincrement())
     color          String
+    count          Int
     reportId       Int
     report         Report       @relation(fields: [reportId], references: [id], onDelete: Cascade)
     foreignAgentId Int
