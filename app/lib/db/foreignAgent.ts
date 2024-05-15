@@ -14,7 +14,7 @@ export async function createForeignAgent(data: createForeignAgentData) {
             ...data,
         });
         if (response.status === 200) {
-            const variants = response.data;
+            const variants = response.data.map(va => va.toLowerCase());
             console.log(variants);
             return await prisma?.foreignAgent.create({
                 data: {
