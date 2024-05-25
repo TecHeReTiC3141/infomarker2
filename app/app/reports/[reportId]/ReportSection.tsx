@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaArrowLeftLong, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
-import FoundAgentsInfo from "@/app/app/reports/[reportId]/FoundAgentsInfo";
+import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 
@@ -33,7 +33,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
         agentIndexes.current = {};
         for (let i = 0; i < marks.length; ++i) {
             const mark = marks[ i ];
-            mark.classList.add("rounded");
             occurLoop:
                 for (let occurrence of (occurrences || [])) {
                     const { foreignAgent } = occurrence;
@@ -42,6 +41,11 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             mark.style.background = occurrence.color;
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
                             mark.dataset.agentId = occurrence.foreignAgentId.toString();
+                            let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
+                            mark.addEventListener("click", () => {
+                                setActiveAgentId(foreignAgent.id);
+                                setActiveAgentIndex(curIndex);
+                            })
                             setAgentOccurCounts(prev =>
                                 ({ ...prev, [ foreignAgent.id ]: (prev[ foreignAgent.id ] || 0) + 1 }));
                             break occurLoop;
@@ -92,10 +96,10 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
                         </div>
                         {occurrences?.map((occurrence) => (
-                            <FoundAgentsInfo key={occurrence.id} occurrence={occurrence}
-                                             isActive={occurrence.foreignAgent.id === activeAgentId}
-                                             counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                             setActiveAgentIndex={setActiveAgentIndex} ref={sectionRef}/>
+                            <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
+                                            isActive={occurrence.foreignAgent.id === activeAgentId}
+                                            counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                            setActiveAgentIndex={setActiveAgentIndex} ref={sectionRef}/>
                         ))}
                     </div>
 

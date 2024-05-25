@@ -5,7 +5,7 @@ import { MdErrorOutline } from "react-icons/md";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import Link from "next/link";
 import { getReportOccurrences } from "@/app/app/reports/actions";
-import FoundAgentsInfo from "@/app/app/reports/[reportId]/FoundAgentsInfo";
+import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
 import ReportSection from "@/app/app/reports/[reportId]/ReportSection";
 
 

@@ -13,7 +13,7 @@ interface FoundAgentsInfoProps {
     isActive: boolean,
 }
 
-const FoundAgentsInfo = forwardRef(function FountAgentInfo({
+const FoundAgentInfo = forwardRef(function FountAgentInfo({
                                                                occurrence,
                                                                counts,
                                                                isActive,
@@ -39,7 +39,7 @@ const FoundAgentsInfo = forwardRef(function FountAgentInfo({
                     className="absolute left-0 top-1/2 -translate-y-[50%] hidden group-hover:block"
                     onClick={event => {
                         event.stopPropagation();
-                        const prev = Math.max(currentOccurIndex - 1, 0);
+                        const prev = (currentOccurIndex - 1 + counts[ occurrence.foreignAgentId ]) % counts[ occurrence.foreignAgentId ];
                         setCurrentOccurIndex(prev);
                         setActiveAgentId(occurrence.foreignAgentId);
                         setActiveAgentIndex(prev);
@@ -63,4 +63,4 @@ const FoundAgentsInfo = forwardRef(function FountAgentInfo({
     )
 });
 
-export default FoundAgentsInfo;
+export default FoundAgentInfo;

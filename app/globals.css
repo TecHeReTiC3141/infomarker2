@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+mark {
+    @apply p-0.5 rounded cursor-pointer;
+}
+
 .highlighted {
-    @apply p-0.5 underline bg-yellow-300;
+    @apply  underline rounded ring-2 ring-transparent;
 }
 
 .highlighted.active {
-    @apply ring-2 ring-blue-300;
+    @apply  ring-blue-300;
 }
