@@ -40,8 +40,9 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         if (mark.textContent?.toLowerCase() === variant) {
                             mark.style.background = occurrence.color;
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
-                            mark.dataset.agentId = occurrence.foreignAgentId.toString();
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
+                            mark.dataset.agentId = occurrence.foreignAgentId.toString();
+                            mark.dataset.index = curIndex;
                             mark.addEventListener("click", () => {
                                 setActiveAgentId(foreignAgent.id);
                                 setActiveAgentIndex(curIndex);
@@ -64,12 +65,15 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             if (mark.dataset.agentId === activeAgentId.toString()) {
                 console.log(mark.textContent);
                 mark.classList.add("highlighted");
+                if (mark.dataset.index === activeAgentIndex.toString()) {
+                    mark.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
             } else {
                 mark.classList.remove("highlighted");
             }
         }
-    }, [activeAgentId, activeAgentIndex]);
-
+    }, [ activeAgentId, activeAgentIndex ]);
+    // TODO: add switcher to possible occurrences section
     return (
         <>
             <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4]">
@@ -90,7 +94,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 </div>
                 <div className="mt-10">
                     <h4 className="text-xl font-bold">Обнаруженные упоминания</h4>
-                    <div className="w-full flex flex-col gap-y-3 overflow-y-auto max-h-[29rem] mt-2">
+                    <div className="w-full flex flex-col gap-y-3 overflow-y-auto max-h-[29rem] mt-2 px-2">
                         <div className="flex w-full justify-between gap-x-3 text-sm text-gray-400">
                             <h4 className="pb-2 border-b-2 border-base-300 flex-1">иноагенты и организации</h4>
                             <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
@@ -103,6 +107,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         ))}
                     </div>
 
+                    <h4 className="text-xl font-bold">Возможные упоминания</h4>
                 </div>
             </div>
         </>

@@ -20,7 +20,7 @@ function countOccurrences(mainStr: string, subStr: string) {
     const matches = mainStr.match(regex);
 
     // Return the number of matches found
-    return matches ? matches.length : 0;
+    return matches?.length || 0;
 }
 
 

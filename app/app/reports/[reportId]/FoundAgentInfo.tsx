@@ -14,25 +14,27 @@ interface FoundAgentsInfoProps {
 }
 
 const FoundAgentInfo = forwardRef(function FountAgentInfo({
-                                                               occurrence,
-                                                               counts,
-                                                               isActive,
-                                                               setActiveAgentId,
-                                                               setActiveAgentIndex
-                                                           }: FoundAgentsInfoProps, ref: ForwardedRef<HTMLParagraphElement>) {
+                                                              occurrence,
+                                                              counts,
+                                                              isActive,
+                                                              setActiveAgentId,
+                                                              setActiveAgentIndex,
+                                                          }: FoundAgentsInfoProps, ref: ForwardedRef<HTMLParagraphElement> & {
+    current: HTMLParagraphElement
+}) {
 
     // TODO: separate each agent into component which contains state of index of it
 
     const [ currentOccurIndex, setCurrentOccurIndex ] = useState<number>(0);
 
-
     return (
-        <div className={clsx(isActive && "ring-2 ring-blue-400", "flex w-full items-center rounded-md px-2 py-4 group cursor-pointer")}
-             style={{ backgroundColor: occurrence.color }}
-             onClick={() => {
-                 setActiveAgentId(occurrence.foreignAgentId);
-                 setActiveAgentIndex(currentOccurIndex);
-             }}>
+        <div
+            className={clsx(isActive && "ring-2 ring-blue-400", "flex w-full items-center rounded-md px-2 py-4 group cursor-pointer")}
+            style={{ backgroundColor: occurrence.color }}
+            onClick={() => {
+                setActiveAgentId(occurrence.foreignAgentId);
+                setActiveAgentIndex(currentOccurIndex);
+            }}>
             <p className="flex-1 text-left">{occurrence.foreignAgent.name}</p>
             <div className="w-20 text-center relative">
                 <button

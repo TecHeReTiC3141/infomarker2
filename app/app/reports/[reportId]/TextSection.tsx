@@ -10,7 +10,8 @@ interface TextSectionProps {
     activeIndex: number,
 }
 
-const TextSection = forwardRef(function TextSection({ text, occurrences, activeIndex }: TextSectionProps, ref: ForwardedRef<HTMLParagraphElement>) {
+const TextSection = forwardRef(function TextSection({ text, occurrences, activeIndex }: TextSectionProps,
+                                                    ref: ForwardedRef<HTMLParagraphElement>) {
     console.log("activeIndex", activeIndex);
     const allSearchWords = occurrences?.reduce(
         (prev, occ) => prev.concat(occ.foreignAgent.variants), [] as string[]) || [];
