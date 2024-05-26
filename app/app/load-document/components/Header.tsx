@@ -4,7 +4,7 @@ import UserDropdown from "@/app/components/user/UserDropdown";
 
 export default function Header() {
     return (
-        <div className="navbar py-6 px-4 mb-8 bg-base-200">
+        <div className="navbar py-6 px-4 mb-8 bg-base-200 w-full">
             <div className="container flex justify-between items-center mx-auto">
 
                 <div className="flex gap-x-8 items-center">

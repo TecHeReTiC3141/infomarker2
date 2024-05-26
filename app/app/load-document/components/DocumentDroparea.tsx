@@ -84,7 +84,12 @@ export default function DocumentDroparea() {
             border-4 border-dashed border-base-content/60
             flex flex-col gap-y-6 items-center justify-center rounded-xl"
                  onDragEnter={() => setIsDragEntered(true)}
-                 onDragLeave={() => setIsDragEntered(false)}
+                 onDragLeave={(event) => {
+                     event.stopPropagation();
+                     if (!event.relatedTarget || !event.currentTarget.contains(event.relatedTarget)) {
+                         setIsDragEntered(false);
+                     }
+                 }}
                  onDragOver={event => event.preventDefault()}
                  onDrop={handleDrop}>
                 {isLoading ? <FadeLoader color="#777" loading={isLoading} height={31} width={6} margin={30}
