@@ -119,7 +119,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             }
         }
     }, [ activeAgentId, activeAgentIndex ]);
-    // TODO: add switcher to possible occurrences section
     return (
         <>
             <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4]">

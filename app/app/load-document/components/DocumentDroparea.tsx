@@ -35,8 +35,9 @@ export default function DocumentDroparea() {
         if (file === undefined) {
             throw new Error("Пустой файл");
         }
+        console.log(file.type);
         if (!fileTypes.includes(file.type)) {
-            throw new Error("Не поддерживаемый тип файла. Проверьте, что файл имеет одно из следующих расширений .doc, .docx, .pdf, .txt");
+            throw new Error("Не поддерживаемый тип файла. Проверьте, что файл имеет одно из следующих расширений .doc, .docx, .api, .txt");
         }
         if (file.size > maxSize) {
             throw new Error("Слишком большой файл. Размер файла должен быть до 10 МБ");

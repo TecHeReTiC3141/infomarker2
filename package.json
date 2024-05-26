@@ -24,6 +24,7 @@
     "natural": "^7.0.5",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
+    "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^4.2.67",
     "prisma": "^5.8.1",
     "react": "^18",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-highlight-words": "^0.16.7",
