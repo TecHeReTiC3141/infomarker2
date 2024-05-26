@@ -1,8 +1,6 @@
-"use client"
-
 import Highlighter from "react-highlight-words";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
-import { ForwardedRef, forwardRef, useEffect, useRef } from "react";
+import { ForwardedRef, forwardRef } from "react";
 
 interface TextSectionProps {
     text: string,

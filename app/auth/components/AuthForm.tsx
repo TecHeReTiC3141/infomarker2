@@ -26,7 +26,7 @@ export default function AuthForm() {
     useEffect(() => {
         console.log(status);
         if (status === "authenticated") {
-            router.push("/app");
+            router.push("/app/load-document");
         }
     }, [status, router]);
     const toggleVariant = useCallback(() => {

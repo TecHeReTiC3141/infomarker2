@@ -3,7 +3,7 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
-import { Report } from "@prisma/client";
+import { Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
 
 interface createReportData {
@@ -28,14 +28,36 @@ export async function createReport(data: createReportData) {
 
     const session = await getServerSession(authOptions) as Session;
     const user = session.user;
-    const foreignAgents = await prisma.foreignAgent.findMany();
-    const { id } = await prisma.report.create({
-        data: {
-            ...data,
 
-            userId: user.id,
-        },
-    });
+    const { checksLeft, role } = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+            checksLeft: true,
+            role: true,
+        }
+    }) as User;
+
+    if (checksLeft <= 0 && role === UserRole.USER) throw new Error("Out of checks for this user");
+    const foreignAgents = await prisma.foreignAgent.findMany();
+    const [ { id }, ] = await prisma.$transaction([
+        prisma.report.create({
+            data: {
+                ...data,
+
+                userId: user.id,
+            },
+        }),
+        prisma.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                checksLeft: {
+                    decrement: 1,
+                }
+            }
+        })
+    ]);
     const lowered = data.text.toLowerCase();
     for (let agent of foreignAgents) {
         let occurCount = 0;

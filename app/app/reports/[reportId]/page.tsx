@@ -1,21 +1,16 @@
-import TextSection from "@/app/app/reports/[reportId]/TextSection";
-import { GrCircleInformation } from "react-icons/gr";
 import { getReportById } from "@/app/lib/db/report";
 import { MdErrorOutline } from "react-icons/md";
-import { FaArrowLeftLong } from "react-icons/fa6";
-import Link from "next/link";
 import { getReportOccurrences } from "@/app/app/reports/actions";
-import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
 import ReportSection from "@/app/app/reports/[reportId]/ReportSection";
 
 
-interface DocumentPageProps {
+interface ReportPageProps {
     params: {
         reportId: string,
     }
 }
 
-export default async function DocumentPage({ params: { reportId } }: DocumentPageProps) {
+export default async function ReportPage({ params: { reportId } }: ReportPageProps) {
 
     const report = await getReportById(+reportId);
 

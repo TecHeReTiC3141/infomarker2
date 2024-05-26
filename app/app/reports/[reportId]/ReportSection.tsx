@@ -6,8 +6,7 @@ import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
-import clsx from "clsx";
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import SelectOccurVariant from "@/app/app/reports/[reportId]/SelectOccurVariant";
 import { IconType } from "react-icons";
 import { BsExclamationCircle } from "react-icons/bs";
@@ -40,6 +39,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     console.log(activeAgentId, activeAgentIndex, agentIndexes);
 
+    // effect for calculating of agent indexes and occurrences
     useEffect(() => {
         const marks = sectionRef.current?.querySelectorAll("mark") || [];
         setAgentOccurCounts({});
@@ -51,17 +51,10 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     const { foreignAgent } = occurrence;
                     for (let variant of foreignAgent?.variants) {
                         if (mark.textContent?.toLowerCase() === variant) {
-                            mark.style.background = occurrence.color;
-                            mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
-
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
-                            let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
-                            mark.dataset.agentId = occurrence.foreignAgentId.toString();
+                            let curIndex = (agentIndexes.current[ foreignAgent.id ]?.length || 0) - 1;
                             mark.dataset.index = curIndex.toString();
-                            mark.addEventListener("click", () => {
-                                setActiveAgentId(foreignAgent.id);
-                                setActiveAgentIndex(curIndex);
-                            })
+                            mark.dataset.agentId = occurrence.foreignAgentId.toString();
                             setAgentOccurCounts(prev =>
                                 ({ ...prev, [ foreignAgent.id ]: (prev[ foreignAgent.id ] || 0) + 1 }));
                             break occurLoop;
@@ -70,8 +63,46 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 }
 
         }
-        console.log(agentIndexes.current);
     }, [ occurrences ]);
+
+    const filteredOccurrences = useMemo(() => {
+            const filtered = activeOccurSection === "found" ?
+                occurrences?.filter(occurrence => agentOccurCounts[ occurrence.foreignAgent.id ] > 0)
+                : occurrences?.filter(occurrence => !agentOccurCounts[ occurrence.foreignAgent.id ]);
+            return filtered?.length ? filtered : occurrences;
+        }
+        , [ activeOccurSection, agentOccurCounts, occurrences ]);
+
+    // effect for styles and interactivity of marks in text section
+    useEffect(() => {
+        const marks = sectionRef.current?.querySelectorAll("mark") || [];
+        for (let i = 0; i < marks.length; ++i) {
+            const mark = marks[ i ];
+            occurLoop:
+                for (let occurrence of (filteredOccurrences || [])) {
+                    const { foreignAgent } = occurrence;
+                    for (let variant of foreignAgent?.variants) {
+                        if (mark.textContent?.toLowerCase() === variant) {
+                            mark.style.background = occurrence.color;
+                            mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
+                            // TODO: implement storing of possible occurrences
+
+                            // Fix error with active when mark is clicked
+                            mark.addEventListener("click", () => {
+                                setActiveAgentId(Number(mark.dataset.agentId));
+                                setActiveAgentIndex(Number(mark.dataset.index) || -1);
+                            });
+                            break occurLoop;
+                        }
+                    }
+                }
+
+        }
+        console.log(agentIndexes.current);
+    }, [ filteredOccurrences ]);
+
+
+    console.log(filteredOccurrences);
 
 
     useEffect(() => {
@@ -96,11 +127,12 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     <FaArrowLeftLong size={16}/> Назад
                 </Link>
                 <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
-                <TextSection text={report.text} occurrences={occurrences} ref={sectionRef}
+                <TextSection text={report.text} occurrences={filteredOccurrences}
+                             ref={sectionRef}
                              activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
             </div>
             <div className="flex-[2] min-w-72">
-                <div className="w-full rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center w-1/2 p-3 text-sm">
+                <div className="w-full rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center p-3 text-sm">
                     <GrCircleInformation size={60}/>
                     <p>Результаты проверки <span className="font-bold">[InfoMarker]*</span> носят строго
                         рекомендательный
@@ -119,20 +151,18 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
                         </div>
                         {activeOccurSection === "found" ?
-                            (occurrences?.filter(occurrence => agentOccurCounts[ occurrence.foreignAgent.id ] > 0))
-                                ?.map((occurrence) => (
-                                    <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
-                                                    isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                    counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                    setActiveAgentIndex={setActiveAgentIndex}/>
-                                )) :
-                            (occurrences?.filter(occurrence => !agentOccurCounts[ occurrence.foreignAgent.id ]))
-                                ?.map((occurrence) => (
-                                    <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
-                                                       isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                       counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                       setActiveAgentIndex={setActiveAgentIndex}/>
-                                ))
+                            filteredOccurrences?.map((occurrence) => (
+                                <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
+                                                isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                setActiveAgentIndex={setActiveAgentIndex}/>
+                            )) :
+                            filteredOccurrences?.map((occurrence) => (
+                                <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
+                                                   isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                   counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                   setActiveAgentIndex={setActiveAgentIndex}/>
+                            ))
                         }
                     </div>
 

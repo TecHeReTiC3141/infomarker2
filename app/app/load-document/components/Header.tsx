@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import UserDropdown from "@/app/components/user/UserDropdown";
 
+
 export default function Header() {
     return (
         <div className="navbar py-6 px-4 mb-8 bg-base-200 w-full">

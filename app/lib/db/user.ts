@@ -1,6 +1,6 @@
 "use server"
 
-import { User } from "@prisma/client";
+import { User, UserRole } from "@prisma/client";
 import prisma from "@/app/lib/db/prisma";
 import bcrypt from "bcrypt";
 
@@ -10,13 +10,19 @@ export interface UserCredentials {
     password: string,
 }
 
+export interface UserSettings {
+    name: string,
+}
+
 export type SessionUser =
     {
         id: number,
     } & {
     name?: string | null | undefined,
     email?: string | null | undefined,
-    image?: string | null | undefined
+    image?: string | null | undefined,
+    role: UserRole,
+    checksLeft: number,
 } | undefined;
 
 export async function createUser({name, email, password}: UserCredentials): Promise<User | null> {

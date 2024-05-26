@@ -79,11 +79,15 @@ export const authOptions: NextAuthOptions = {
                 select: {
                     name: true,
                     image: true,
+                    role: true,
+                    checksLeft: true,
                 }
-            })!;
+            }) as User;
 
-            session.user.name = (user as User).name;
-            session.user.image = (user as User).image;
+            session.user.name = user.name;
+            session.user.image = user.image;
+            session.user.role = user.role;
+            session.user.checksLeft = user.checksLeft;
 
             return session;
         },
