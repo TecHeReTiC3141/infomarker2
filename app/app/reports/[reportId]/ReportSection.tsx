@@ -1,16 +1,27 @@
 "use client"
 
 import Link from "next/link";
-import { FaArrowLeftLong, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { FaArrowLeftLong, FaRegCircleQuestion } from "react-icons/fa6";
 import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
+import clsx from "clsx";
+import SelectOccurVariant from "@/app/app/reports/[reportId]/SelectOccurVariant";
+import { IconType } from "react-icons";
+import { BsExclamationCircle } from "react-icons/bs";
+import PossibleOccurInfo from "@/app/app/reports/[reportId]/components/PossibleOccurInfo";
+import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
 
 interface ReportSectionProps {
     report: any,
     occurrences: OccurrenceWithAgent[] | undefined
+}
+
+export const occurVariants: { [ k: string ]: IconType } = {
+    "possible": FaRegCircleQuestion,
+    "found": BsExclamationCircle,
 }
 
 export default function ReportSection({ report, occurrences }: ReportSectionProps) {
@@ -24,6 +35,8 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     const [ activeAgentId, setActiveAgentId ] = useState<number>(-1);
 
     const [ activeAgentIndex, setActiveAgentIndex ] = useState<number>(-1);
+
+    const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
 
     console.log(activeAgentId, activeAgentIndex, agentIndexes);
 
@@ -39,10 +52,12 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     for (let variant of foreignAgent?.variants) {
                         if (mark.textContent?.toLowerCase() === variant) {
                             mark.style.background = occurrence.color;
+                            mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
+
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
                             mark.dataset.agentId = occurrence.foreignAgentId.toString();
-                            mark.dataset.index = curIndex;
+                            mark.dataset.index = curIndex.toString();
                             mark.addEventListener("click", () => {
                                 setActiveAgentId(foreignAgent.id);
                                 setActiveAgentIndex(curIndex);
@@ -93,21 +108,34 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         юридического документа</p>
                 </div>
                 <div className="mt-10">
-                    <h4 className="text-xl font-bold">Обнаруженные упоминания</h4>
+                    <div className="w-full flex justify-between items-center">
+
+                        <h4 className="text-xl font-bold">{activeOccurSection === "found" ? "Обнаруженные" : "Возможные"} упоминания</h4>
+                        <SelectOccurVariant active={activeOccurSection} setActive={setActiveOccurSection}/>
+                    </div>
                     <div className="w-full flex flex-col gap-y-3 overflow-y-auto max-h-[29rem] mt-2 px-2">
                         <div className="flex w-full justify-between gap-x-3 text-sm text-gray-400">
                             <h4 className="pb-2 border-b-2 border-base-300 flex-1">иноагенты и организации</h4>
                             <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
                         </div>
-                        {occurrences?.map((occurrence) => (
-                            <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
-                                            isActive={occurrence.foreignAgent.id === activeAgentId}
-                                            counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                            setActiveAgentIndex={setActiveAgentIndex} ref={sectionRef}/>
-                        ))}
+                        {activeOccurSection === "found" ?
+                            (occurrences?.filter(occurrence => agentOccurCounts[ occurrence.foreignAgent.id ] > 0))
+                                ?.map((occurrence) => (
+                                    <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
+                                                    isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                    counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                    setActiveAgentIndex={setActiveAgentIndex}/>
+                                )) :
+                            (occurrences?.filter(occurrence => !agentOccurCounts[ occurrence.foreignAgent.id ]))
+                                ?.map((occurrence) => (
+                                    <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
+                                                       isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                       counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                       setActiveAgentIndex={setActiveAgentIndex}/>
+                                ))
+                        }
                     </div>
 
-                    <h4 className="text-xl font-bold">Возможные упоминания</h4>
                 </div>
             </div>
         </>

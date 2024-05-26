@@ -86,7 +86,7 @@ export default function DocumentDroparea() {
                  onDragEnter={() => setIsDragEntered(true)}
                  onDragLeave={(event) => {
                      event.stopPropagation();
-                     if (!event.relatedTarget || !event.currentTarget.contains(event.relatedTarget)) {
+                     if (!event.relatedTarget || !event.currentTarget.contains(event.relatedTarget as Node)) {
                          setIsDragEntered(false);
                      }
                  }}

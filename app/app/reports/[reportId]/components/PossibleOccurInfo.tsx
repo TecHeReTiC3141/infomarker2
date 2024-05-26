@@ -4,7 +4,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import clsx from "clsx";
 import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
 
-interface FoundAgentsInfoProps {
+interface PossibleOccurInfoProps {
     occurrence: OccurrenceWithAgent,
     counts: { [ p: string ]: number },
     setActiveAgentId: (value: (((prevState: number) => number) | number)) => void,
@@ -12,19 +12,19 @@ interface FoundAgentsInfoProps {
     isActive: boolean,
 }
 
-export default function FoundAgentInfo({
+export default function PossibleOccurInfo({
                                            occurrence,
                                            counts,
                                            isActive,
                                            setActiveAgentId,
                                            setActiveAgentIndex,
-                                       }: FoundAgentsInfoProps) {
+                                       }: PossibleOccurInfoProps) {
     const [ currentOccurIndex, setCurrentOccurIndex ] = useState<number>(0);
 
     return (
         <div
             className={clsx(isActive && "ring-2 ring-blue-400", "flex w-full items-center rounded-md px-2 py-4 group cursor-pointer")}
-            style={{ backgroundColor: occurrence.color, color: getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black" }}
+            style={{ backgroundColor: occurrence.color, color: getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black"}}
             onClick={() => {
                 setActiveAgentId(occurrence.foreignAgentId);
                 setActiveAgentIndex(currentOccurIndex);
