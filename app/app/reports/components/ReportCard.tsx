@@ -1,9 +1,9 @@
-import { Document } from "@prisma/client";
 import FileIcon from "@/app/app/load-document/components/FileIcon";
 import Link from "next/link";
+import { Report } from "@prisma/client";
 
 interface ReportCardProps {
-    report: Document,
+    report: Report,
 }
 
 export default function ReportCard({ report }: ReportCardProps) {
