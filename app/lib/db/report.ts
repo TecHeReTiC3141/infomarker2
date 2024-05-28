@@ -95,7 +95,7 @@ export async function getReportById(id: number) {
 }
 
 export async function getUserReports(userId: number): Promise<Report[]> {
-    return await prisma.report.findMany({
+    return prisma.report.findMany({
         where: {
             userId,
         }

@@ -28,13 +28,10 @@ export default function AuthForm() {
         if (status === "authenticated") {
             router.push("/app/load-document");
         }
-    }, [status, router]);
+    }, [ status, router ]);
+
     const toggleVariant = useCallback(() => {
-        if (variant === "LOGIN") {
-            setVariant("REGISTER");
-        } else {
-            setVariant("LOGIN");
-        }
+        setVariant(variant === "LOGIN" ? "REGISTER" : "LOGIN");
     }, [ variant ]);
 
     const {
@@ -58,7 +55,7 @@ export default function AuthForm() {
             const isReg = await registerUser(data as FormData);
             if (isReg) {
                 toast.success("You've successfully created your account! Now you can login")
-                await signIn("credentials", {...data, redirect: false});
+                await signIn("credentials", { ...data, redirect: false });
             } else {
                 toast.error("Something went wrong");
             }
