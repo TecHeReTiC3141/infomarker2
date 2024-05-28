@@ -52,7 +52,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     for (let variant of foreignAgent?.variants) {
                         if (mark.textContent?.toLowerCase() === variant) {
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
-                            let curIndex = (agentIndexes.current[ foreignAgent.id ]?.length || 0) - 1;
+                            let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
                             mark.dataset.index = curIndex.toString();
                             mark.dataset.agentId = occurrence.foreignAgentId.toString();
                             setAgentOccurCounts(prev =>
@@ -89,8 +89,9 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
                             // Fix error with active when mark is clicked
                             mark.addEventListener("click", () => {
+                                console.log(mark.dataset.agentId, mark.dataset.index, Number(mark.dataset.index) ?? -1);
                                 setActiveAgentId(Number(mark.dataset.agentId));
-                                setActiveAgentIndex(Number(mark.dataset.index) || -1);
+                                setActiveAgentIndex(Number(mark.dataset.index) ?? -1);
                             });
                             break occurLoop;
                         }
@@ -98,18 +99,13 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 }
 
         }
-        console.log(agentIndexes.current);
     }, [ filteredOccurrences ]);
-
-
-    console.log(filteredOccurrences);
 
 
     useEffect(() => {
         const marks = (sectionRef as MutableRefObject<HTMLParagraphElement>).current?.querySelectorAll("mark") || [];
         for (let mark of marks) {
             if (mark.dataset.agentId === activeAgentId.toString()) {
-                console.log(mark.textContent);
                 mark.classList.add("highlighted");
                 if (mark.dataset.index === activeAgentIndex.toString()) {
                     mark.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -130,7 +126,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                              ref={sectionRef}
                              activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
             </div>
-            <div className="flex-[2] min-w-72">
+            <div className="flex-[2] min-w-72 flex flex-col gap-y-3">
                 <div className="w-full rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center p-3 text-sm">
                     <GrCircleInformation size={60}/>
                     <p>Результаты проверки <span className="font-bold">[InfoMarker]*</span> носят строго
@@ -138,34 +134,34 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         характер и не могут использоваться в качестве
                         юридического документа</p>
                 </div>
-                <div className="mt-10">
-                    <div className="w-full flex justify-between items-center">
+                <div className="w-full flex justify-between items-center">
 
-                        <h4 className="text-xl font-bold">{activeOccurSection === "found" ? "Обнаруженные" : "Возможные"} упоминания</h4>
-                        <SelectOccurVariant active={activeOccurSection} setActive={setActiveOccurSection}/>
-                    </div>
-                    <div className="w-full flex flex-col gap-y-3 overflow-y-auto max-h-[29rem] mt-2 px-2">
-                        <div className="flex w-full justify-between gap-x-3 text-sm text-gray-400">
-                            <h4 className="pb-2 border-b-2 border-base-300 flex-1">иноагенты и организации</h4>
-                            <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
-                        </div>
-                        {activeOccurSection === "found" ?
-                            filteredOccurrences?.map((occurrence) => (
-                                <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
-                                                isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                setActiveAgentIndex={setActiveAgentIndex}/>
-                            )) :
-                            filteredOccurrences?.map((occurrence) => (
-                                <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
-                                                   isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                   counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                   setActiveAgentIndex={setActiveAgentIndex}/>
-                            ))
-                        }
-                    </div>
-
+                    <h4 className="text-xl font-bold">{activeOccurSection === "found" ? "Обнаруженные" : "Возможные"} упоминания</h4>
+                    <SelectOccurVariant active={activeOccurSection} setActive={setActiveOccurSection}/>
                 </div>
+                <div
+                    className="w-full flex flex-col gap-y-3 overflow-y-auto mt-2 px-2 max-2xl:text-sm pb-1">
+                    <div className="flex w-full justify-between gap-x-3 text-sm text-gray-400">
+                        <h4 className="pb-2 border-b-2 border-base-300 flex-1">иноагенты и организации</h4>
+                        <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
+                    </div>
+                    {activeOccurSection === "found" ?
+                        filteredOccurrences?.map((occurrence) => (
+                            <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
+                                            isActive={occurrence.foreignAgent.id === activeAgentId}
+                                            activeAgentIndex={activeAgentIndex}
+                                            counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                            setActiveAgentIndex={setActiveAgentIndex}/>
+                        )) :
+                        filteredOccurrences?.map((occurrence) => (
+                            <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
+                                               isActive={occurrence.foreignAgent.id === activeAgentId}
+                                               counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                               setActiveAgentIndex={setActiveAgentIndex}/>
+                        ))
+                    }
+                </div>
+
             </div>
         </>
     )

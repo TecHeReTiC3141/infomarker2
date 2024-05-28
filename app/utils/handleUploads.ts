@@ -53,7 +53,7 @@ function readTextFromDocx(file: File) {
         // Чтение файла как массива байт
         reader.readAsArrayBuffer(file);
     });
-};
+}
 
 
 interface FileExtensionHandlers {

@@ -10,7 +10,7 @@ interface createForeignAgentData {
 export async function createForeignAgent(data: createForeignAgentData) {
     try {
 
-        const response = await axios.post<string[]>("http://localhost:5000/get_foreign_agent_variants", {
+        const response = await axios.post<string[]>(`${process.env.NLP_SERVER_BASE_URL}/get_foreign_agent_variants`, {
             ...data,
         });
         if (response.status === 200) {

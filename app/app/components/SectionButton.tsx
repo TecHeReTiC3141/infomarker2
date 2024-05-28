@@ -16,7 +16,7 @@ export default function SectionButton({ text, section }: SectionButtonProps) {
 
     return (
         <Link href={`/app/${section}`}
-              className={clsx("btn btn-lg w-56 justify-start", isActive ? "btn-primary" : "btn-neutral")}>
+              className={clsx("btn btn-lg w-40 lg:w-48 xl:w-56 justify-start", isActive ? "btn-primary" : "btn-neutral")}>
             {text}
         </Link>
     )

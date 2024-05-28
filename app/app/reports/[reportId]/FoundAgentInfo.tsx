@@ -8,6 +8,7 @@ interface FoundAgentsInfoProps {
     occurrence: OccurrenceWithAgent,
     counts: { [ p: string ]: number },
     setActiveAgentId: (value: (((prevState: number) => number) | number)) => void,
+    activeAgentIndex: number,
     setActiveAgentIndex: (value: (((prevState: number) => number) | number)) => void,
     isActive: boolean,
 }
@@ -17,9 +18,9 @@ export default function FoundAgentInfo({
                                            counts,
                                            isActive,
                                            setActiveAgentId,
+                                           activeAgentIndex,
                                            setActiveAgentIndex,
                                        }: FoundAgentsInfoProps) {
-    const [ currentOccurIndex, setCurrentOccurIndex ] = useState<number>(0);
 
     return (
         <div
@@ -27,7 +28,7 @@ export default function FoundAgentInfo({
             style={{ backgroundColor: occurrence.color, color: getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black" }}
             onClick={() => {
                 setActiveAgentId(occurrence.foreignAgentId);
-                setActiveAgentIndex(currentOccurIndex);
+                setActiveAgentIndex(0);
             }}>
             <p className="flex-1 text-left">{occurrence.foreignAgent.name}</p>
             <div className="w-20 text-center relative">
@@ -35,20 +36,18 @@ export default function FoundAgentInfo({
                     className="absolute left-0 top-1/2 -translate-y-[50%] hidden group-hover:block"
                     onClick={event => {
                         event.stopPropagation();
-                        const prev = (currentOccurIndex - 1 + counts[ occurrence.foreignAgentId ]) % counts[ occurrence.foreignAgentId ];
-                        setCurrentOccurIndex(prev);
+                        const prev = (activeAgentIndex - 1 + counts[ occurrence.foreignAgentId ]) % counts[ occurrence.foreignAgentId ];
                         setActiveAgentId(occurrence.foreignAgentId);
                         setActiveAgentIndex(prev);
                     }}>
                     <FaChevronLeft size={12}/>
                 </button>
-                {isActive && <span>{currentOccurIndex + 1} / </span>}{counts[ occurrence.foreignAgentId ]}
+                {isActive && <span>{activeAgentIndex + 1} / </span>}{counts[ occurrence.foreignAgentId ]}
                 <button
                     className="absolute right-0 top-1/2 -translate-y-[50%] hidden group-hover:block"
                     onClick={event => {
                         event.stopPropagation();
-                        const next = (currentOccurIndex + 1) % counts[ occurrence.foreignAgentId ];
-                        setCurrentOccurIndex(next);
+                        const next = (activeAgentIndex + 1) % counts[ occurrence.foreignAgentId ];
                         setActiveAgentId(occurrence.foreignAgentId);
                         setActiveAgentIndex(next);
                     }}>
