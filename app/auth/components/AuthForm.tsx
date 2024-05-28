@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import { GithubSignInButton, GoogleSignInButton, YandexSignInButton } from "@/app/auth/components/AuthButtons";
+import { YandexSignInButton, VKSignInButton } from "@/app/auth/components/AuthButtons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormSchema, RegisterFormSchema } from "@/app/lib/schema";
 import { registerUser } from "@/app/auth/actions";
@@ -87,7 +87,7 @@ export default function AuthForm() {
                 <div className="divider text-sm">Or continue with</div>
                 <div className="flex gap-3">
                     <YandexSignInButton/>
-                    <GithubSignInButton/>
+                    <VKSignInButton/>
                 </div>
                 <div className="flex gap-2 justify-center mt-4">
 
