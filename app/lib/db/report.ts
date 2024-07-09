@@ -58,6 +58,7 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
+    // TODO: when foreign agents lists are updated then find occurrences in reports again
     const lowered = data.text.toLowerCase();
     for (let agent of foreignAgents) {
         let occurCount = 0;
@@ -100,4 +101,34 @@ export async function getUserReports(userId: number): Promise<Report[]> {
             userId,
         }
     });
+}
+
+export async function recreateAgentOccurrences(reportId: number) {
+    const report = await prisma.report.findUnique({
+        where: {
+            id: reportId,
+        }
+    });
+    if (!report) {
+        console.error("No report find by id");
+        return;
+    }
+    const foreignAgents = await prisma.foreignAgent.findMany();
+    const lowered = report.text.toLowerCase();
+    for (let agent of foreignAgents) {
+        let occurCount = 0;
+        for (let variant of agent.variants) {
+            occurCount += countOccurrences(lowered, variant);
+        }
+        if (occurCount > 0) {
+            await prisma.agentOccurance.create({
+                data: {
+                    reportId,
+                    foreignAgentId: agent.id,
+                    color: generateRandomHexColor(),
+                    count: occurCount,
+                }
+            });
+        }
+    }
 }

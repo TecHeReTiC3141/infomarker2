@@ -1,5 +1,5 @@
 import prisma from "@/app/lib/db/prisma";
-import { createReport } from "@/app/lib/db/report";
+import { createReport, recreateAgentOccurrences } from "@/app/lib/db/report";
 import { createForeignAgent } from "@/app/lib/db/foreignAgent";
 
 const samples = {
@@ -54,6 +54,10 @@ async function main() {
             type: "ORGANISATION",
         });
     }
+    const reports = await prisma.report.findMany();
+    await Promise.all(
+        reports.map(async report => recreateAgentOccurrences(report.id))
+    );
     console.log("Seeding completed");
 }
 

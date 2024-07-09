@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={clsx(inter.className, "h-[100vh] flex flex-col")}>
       <SessionProvider>
         <Header />
-        <div className="flex-1 container mx-auto">
+        <div className="flex-1 container mx-auto mb-4">
             {children}
         </div>
         <Footer />
