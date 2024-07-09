@@ -4,17 +4,22 @@ import Link from "next/link";
 import { FaArrowLeftLong, FaRegCircleQuestion } from "react-icons/fa6";
 import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
-import FoundAgentInfo from "@/app/app/reports/[reportId]/FoundAgentInfo";
+import FoundAgentInfo from "@/app/app/reports/[reportId]/components/FoundOccurInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import SelectOccurVariant from "@/app/app/reports/[reportId]/SelectOccurVariant";
+import SelectOccurVariant from "@/app/app/reports/[reportId]/components/SelectOccurVariant";
 import { IconType } from "react-icons";
 import { BsExclamationCircle } from "react-icons/bs";
 import PossibleOccurInfo from "@/app/app/reports/[reportId]/components/PossibleOccurInfo";
 import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
+import { FaDownload } from "react-icons/fa6";
+import html2canvas from 'html2canvas-pro';
+import jsPDF from "jspdf";
+import { Report } from "@prisma/client";
+
 
 interface ReportSectionProps {
-    report: any,
+    report: Report,
     occurrences: OccurrenceWithAgent[] | undefined
 }
 
@@ -24,6 +29,8 @@ export const occurVariants: { [ k: string ]: IconType } = {
 }
 
 export default function ReportSection({ report, occurrences }: ReportSectionProps) {
+
+    const reportRef = useRef<HTMLDivElement>(null);
 
     const sectionRef = useRef<HTMLParagraphElement>(null);
 
@@ -38,6 +45,21 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
 
     console.log(activeAgentId, activeAgentIndex, agentIndexes);
+
+    async function generatePdf() {
+        const reportElement = reportRef.current;
+
+        const canvas = await html2canvas(reportElement!);
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('report.pdf');
+    };
 
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
@@ -115,13 +137,17 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             }
         }
     }, [ activeAgentId, activeAgentIndex ]);
+
     return (
-        <>
-            <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4]">
+        <div className="flex gap-x-8" ref={reportRef}>
+            <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4] relative">
                 <Link href="/app/reports" className="flex gap-x-2 text-sm items-center hover:underline">
                     <FaArrowLeftLong size={16}/> Назад
                 </Link>
                 <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
+                <div className="tooltip tooltip-bottom absolute right-1 top-1" data-tip="Скачать PDF">
+                    <button className=" btn btn-circle btn-ghost" onClick={generatePdf}><FaDownload size={24}/></button>
+                </div>
                 <TextSection text={report.text} occurrences={filteredOccurrences}
                              ref={sectionRef}
                              activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
@@ -163,7 +189,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 </div>
 
             </div>
-        </>
+        </div>
     )
 
 }

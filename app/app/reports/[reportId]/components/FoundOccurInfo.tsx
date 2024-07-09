@@ -1,10 +1,9 @@
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
-import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import clsx from "clsx";
 import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
 
-interface FoundAgentsInfoProps {
+interface FoundOccurInfoProps {
     occurrence: OccurrenceWithAgent,
     counts: { [ p: string ]: number },
     setActiveAgentId: (value: (((prevState: number) => number) | number)) => void,
@@ -13,14 +12,14 @@ interface FoundAgentsInfoProps {
     isActive: boolean,
 }
 
-export default function FoundAgentInfo({
+export default function FoundOccurInfo({
                                            occurrence,
                                            counts,
                                            isActive,
                                            setActiveAgentId,
                                            activeAgentIndex,
                                            setActiveAgentIndex,
-                                       }: FoundAgentsInfoProps) {
+                                       }: FoundOccurInfoProps) {
 
     return (
         <div
