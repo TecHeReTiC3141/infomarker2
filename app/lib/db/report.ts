@@ -5,6 +5,8 @@ import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
 import { Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import { util } from "zod";
+import find = util.find;
 
 interface createReportData {
     filename: string;
@@ -117,8 +119,13 @@ export async function recreateAgentOccurrences(reportId: number) {
     const lowered = report.text.toLowerCase();
     for (let agent of foreignAgents) {
         let occurCount = 0;
+        let findVariants: Set<string> = new Set();
         for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
+            let occurCountForVariant = countOccurrences(lowered, variant);
+            if (occurCountForVariant > 0){
+                occurCount += occurCountForVariant;
+                findVariants.add(variant)
+            }
         }
         if (occurCount > 0) {
             await prisma.agentOccurance.create({
@@ -127,6 +134,7 @@ export async function recreateAgentOccurrences(reportId: number) {
                     foreignAgentId: agent.id,
                     color: generateRandomHexColor(),
                     count: occurCount,
+                    foundVariants: Array.from(findVariants),
                 }
             });
         }
