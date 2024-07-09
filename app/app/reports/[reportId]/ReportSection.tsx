@@ -148,8 +148,8 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     }, [ activeAgentId, activeAgentIndex ]);
 
     return (
-        <div>
-            <div className="flex gap-x-8 max-h-[85vh] h-full">
+        <>
+            <div className="flex gap-x-8">
                 <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4] relative">
                     <Link href="/app/reports" className="flex gap-x-2 text-sm items-center hover:underline">
                         <FaArrowLeftLong size={16}/> Назад
@@ -201,9 +201,9 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
                 </div>
             </div>
-                <ReportDownload ref={downloadRef} report={report} foundOccurrences={foundOccurrences}
-                                possibleOccurrences={possibleOccurrences}/>
-        </div>
+            <ReportDownload ref={downloadRef} report={report} foundOccurrences={foundOccurrences}
+                            possibleOccurrences={possibleOccurrences}/>
+        </>
     )
 
 }
