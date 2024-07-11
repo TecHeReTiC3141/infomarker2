@@ -17,6 +17,8 @@ type Variant = "LOGIN" | "REGISTER";
 
 export default function AuthForm() {
 
+    // TODO: show loader while using 0auth instead of error
+
     const [ variant, setVariant ] = useState<Variant>("LOGIN");
 
     const { data: session, status } = useSession();
@@ -49,6 +51,8 @@ export default function AuthForm() {
         },
         resolver: zodResolver(variant === "LOGIN" ? LoginFormSchema : RegisterFormSchema),
     });
+
+
 
     const onSubmit: SubmitHandler<FieldValues> = async (data) => {
         if (variant === "REGISTER") {

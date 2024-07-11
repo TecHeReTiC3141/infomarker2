@@ -32,6 +32,7 @@ export function GoogleSignInButton() {
 }
 
 export function YandexSignInButton() {
+    // TODO: check their behavior for error
     const handleClick = async () => {
         const signInResponse = await signIn("yandex", {
             redirect: false,
