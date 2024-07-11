@@ -21,12 +21,11 @@ export default function AuthForm() {
 
     const [ variant, setVariant ] = useState<Variant>("LOGIN");
 
-    const { data: session, status } = useSession();
+    const { status } = useSession();
 
     const router = useRouter();
 
     useEffect(() => {
-        console.log(status);
         if (status === "authenticated") {
             router.push("/app/load-document");
         }
@@ -52,14 +51,12 @@ export default function AuthForm() {
         resolver: zodResolver(variant === "LOGIN" ? LoginFormSchema : RegisterFormSchema),
     });
 
-
-
     const onSubmit: SubmitHandler<FieldValues> = async (data) => {
         if (variant === "REGISTER") {
             const isReg = await registerUser(data as FormData);
             if (isReg) {
                 toast.success("You've successfully created your account! Now you can login")
-                await signIn("credentials", { ...data, redirect: false });
+                await signIn("credentials", { ...data, callbackUrl: "/app/load-document" });
             } else {
                 toast.error("Something went wrong");
             }

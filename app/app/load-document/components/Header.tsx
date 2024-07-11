@@ -17,7 +17,7 @@ export default async function Header() {
             <div className="container flex justify-between items-center mx-auto">
                 <div className="flex gap-x-8 items-center">
                     <Link href="/">
-                        <Image src="/logo.png" alt="Informarker" width={640} height={480} className="w-80"/>
+                        <Image src="/logo.png" alt="Informarker" priority={true} width={640} height={480} className="w-80"/>
                     </Link>
                     <h4 className="text-gray-500 text-xs md:text-sm select-none">Маркировка упоминаний иностранных
                         агентов <br /> и нежелательных
