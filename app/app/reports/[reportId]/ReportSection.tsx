@@ -73,7 +73,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             occurLoop:
                 for (let occurrence of (occurrences || [])) {
                     const { foreignAgent ,foundVariants } = occurrence;
-                        const lengthSortReversed = (a: string, b: string) => (a > b ? -1 : 1)
+                        const lengthSortReversed = (a: string, b: string) => (a.length > b.length ? -1 : 1)
                         for (let variant of foundVariants.sort(lengthSortReversed)) {
                             if (mark.textContent?.toLowerCase() === variant) {
                                 agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
