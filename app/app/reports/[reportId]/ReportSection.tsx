@@ -45,8 +45,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
 
-    console.log(activeAgentId, activeAgentIndex, agentIndexes);
-
     async function generatePdf() {
         const reportElement = downloadRef.current;
 
