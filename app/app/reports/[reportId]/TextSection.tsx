@@ -1,7 +1,6 @@
 import Highlighter from "react-highlight-words";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { ForwardedRef, forwardRef } from "react";
-import { createPortal } from "react-dom";
 
 interface TextSectionProps {
     text: string,
@@ -13,7 +12,7 @@ const TextSection = forwardRef(function TextSection({ text, occurrences, activeI
                                                     ref: ForwardedRef<HTMLParagraphElement>) {
         console.log("activeIndex", activeIndex);
         const allSearchWords = occurrences?.reduce(
-            (prev, occ) => prev.concat(occ.foreignAgent.variants), [] as string[]) || [];
+            (prev, occ) => prev.concat(occ.foundVariants), [] as string[]) || [];
 
         return (
 

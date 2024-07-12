@@ -128,7 +128,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         }
                     }
                 }
-
         }
     }, [ filteredOccurrences ]);
 
