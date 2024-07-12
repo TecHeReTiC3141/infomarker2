@@ -23,7 +23,7 @@ const sections: SectionButtonProps[] = [
     },
 ]
 
-export default function ProfileLayout({children}: ProfileLayoutProps) {
+export default function AppLayout({children}: ProfileLayoutProps) {
     return (
         <div className="container mx-auto flex justify-between gap-x-12 h-full">
             <div className="flex flex-col gap-y-4">

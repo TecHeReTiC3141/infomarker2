@@ -3,8 +3,11 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
-import { Report, User, UserRole } from "@prisma/client";
+import { ForeignAgent, Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import { util } from "zod";
+import find = util.find;
+import { id } from "postcss-selector-parser";
 
 interface createReportData {
     filename: string;
@@ -23,6 +26,34 @@ function countOccurrences(mainStr: string, subStr: string) {
     return matches?.length || 0;
 }
 
+
+async function fillAgentOccurrences(data: createReportData,
+                                   id: number) {
+    const foreignAgents = await prisma.foreignAgent.findMany();
+    const lowered = data.text.toLowerCase();
+    for (let agent of foreignAgents) {
+        let occurCount = 0;
+        let findVariants: Set<string> = new Set();
+        for (let variant of agent.variants) {
+            let occurCountForVariant = countOccurrences(lowered, variant);
+            if (occurCountForVariant > 0){
+                occurCount += occurCountForVariant;
+                findVariants.add(variant)
+            }
+        }
+        if (occurCount > 0) {
+            await prisma.agentOccurance.create({
+                data: {
+                    reportId: id,
+                    foreignAgentId: agent.id,
+                    color: generateRandomHexColor(),
+                    count: occurCount,
+                    foundVariants: Array.from(findVariants),
+                }
+            });
+        }
+    }
+}
 
 export async function createReport(data: createReportData) {
 
@@ -58,24 +89,8 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
-    const lowered = data.text.toLowerCase();
-    for (let agent of foreignAgents) {
-        let occurCount = 0;
-        for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
-        }
-        if (occurCount > 0) {
-            await prisma.agentOccurance.create({
-                data: {
-                    reportId: id,
-                    foreignAgentId: agent.id,
-                    color: generateRandomHexColor(),
-                    count: occurCount,
-                }
-            });
-            console.log(`${agent.name} found`);
-        }
-    }
+    // TODO: when foreign agents lists are updated then find occurrences in reports again
+    await fillAgentOccurrences(data, id);
     return id;
 }
 
@@ -100,4 +115,18 @@ export async function getUserReports(userId: number): Promise<Report[]> {
             userId,
         }
     });
+}
+
+export async function recreateAgentOccurrences(reportId: number) {
+    const report = await prisma.report.findUnique({
+        where: {
+            id: reportId,
+        }
+    });
+    if (!report) {
+        console.error("No report find by id");
+        return;
+    }
+
+    await fillAgentOccurrences(report, reportId);
 }
