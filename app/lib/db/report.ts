@@ -8,6 +8,7 @@ import { generateRandomHexColor } from "@/app/utils/occuranceColors";
 import { util } from "zod";
 import find = util.find;
 import { id } from "postcss-selector-parser";
+import axios from "axios";
 
 interface createReportData {
     filename: string;
@@ -27,20 +28,34 @@ function countOccurrences(mainStr: string, subStr: string) {
 }
 
 
+interface ProperNames{
+    organizations: string[],
+    names: string[]
+}
+export async function get_proper_name(data: string) {
+    try {
+
+        const response = await axios.post<ProperNames>(`${ process.env.NLP_SERVER_BASE_URL }/get_proper_names_from_text`, data);
+        if (response.status === 200) {
+            return response.data
+        }
+        console.error(response.statusText);
+        return null;
+    } catch (error) {
+        console.error((error as Error).message);
+    }
+}
+
 async function fillAgentOccurrences(data: createReportData,
                                    id: number) {
     const foreignAgents = await prisma.foreignAgent.findMany();
     const lowered = data.text.toLowerCase();
+    const foundProperNames = await get_proper_name(lowered)
+
     for (let agent of foreignAgents) {
-        let occurCount = 0;
-        let findVariants: Set<string> = new Set();
-        for (let variant of agent.variants) {
-            let occurCountForVariant = countOccurrences(lowered, variant);
-            if (occurCountForVariant > 0){
-                occurCount += occurCountForVariant;
-                findVariants.add(variant)
-            }
-        }
+        const findVariants = (foundProperNames?.names.concat(foundProperNames?.organizations) || [] )
+            .filter(name => agent.variants.includes(name))
+        const occurCount = findVariants.length
         if (occurCount > 0) {
             await prisma.agentOccurance.create({
                 data: {
