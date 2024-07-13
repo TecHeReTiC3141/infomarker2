@@ -1,7 +1,12 @@
 import spacy
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 from spacy.tokens import Doc
 
+from neon_connect import foreign_agents_list
+
 nlp_ru = spacy.load('ru_core_news_lg')
+
 
 def __find_name(doc: Doc) -> list[str]:
     names = []
@@ -26,7 +31,6 @@ def __find_name(doc: Doc) -> list[str]:
     return names
 
 
-
 def get_proper_name(text: str) -> tuple[list[str], list[str]]:
     doc_ru = nlp_ru(text)
     orgs = [ent.lemma_ for ent in doc_ru.ents if ent.label_ == "ORG"]
@@ -34,10 +38,19 @@ def get_proper_name(text: str) -> tuple[list[str], list[str]]:
     return orgs, names
 
 
+def filter_agents(text: str) -> list[str]:
+    orgs, names = get_proper_name(text)
+    prop_names = orgs + names
+    agents = []
+    for name in prop_names:
+        found_agent = process.extractOne(name, foreign_agents_list, score_cutoff=80)
+        if found_agent:
+            agents.append(found_agent[0])
+    return agents
+
 
 if __name__ == '__main__':
-
-    text = """На прошлой неделе Петрова Николая Александровича позвали на мероприятия культурно-просветительное 
+    text = """Сиразетдинов Азат Ниязович передает вам всем привет. На прошлой неделе Петрова Николая Александровича позвали на мероприятия культурно-просветительное 
     объединения "АртПланета" для участия в конференции, посвященной инновациям в искусстве. Также, на этом мероприятии 
     присутствовала Иванова Ольга Сергеевна, которая выступала с докладом от имени компании "Фирма Разработок". В ходе 
     конференции, Дмитрий Николаевич Кузнецов из корпорации "Систем" представил новый проект, направленный на развитие 
@@ -67,7 +80,4 @@ if __name__ == '__main__':
     # from spacy import displacy
     # displacy.serve(nlp_ru(text), style="ent")
 
-    orgs, names = get_proper_name(text)
-    print(orgs)
-    print(names)
-
+    filter_agents(text)

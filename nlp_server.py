@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import pymorphy2
 
-from ai_searcher import get_proper_name
+from ai_searcher import get_proper_name, filter_agents
 
 app = Flask(__name__)
 morph = pymorphy2.MorphAnalyzer()
@@ -70,6 +70,14 @@ def get_proper_names_from_text():
         "names": names
     }
 
+
+@app.route('/get_foreign_agents_from_text', methods=['POST'])
+def get_foreign_agents_from_text():
+    text = request.data.decode('utf-8')
+    agents = filter_agents(text)
+    return {
+        "agents": agents
+    }
 
 
 if __name__ == '__main__':
