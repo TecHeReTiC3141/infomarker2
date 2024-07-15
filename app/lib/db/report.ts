@@ -3,8 +3,12 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
-import { Report, User, UserRole } from "@prisma/client";
+import { ForeignAgent, Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import { util } from "zod";
+import find = util.find;
+import { id } from "postcss-selector-parser";
+import axios from "axios";
 
 interface createReportData {
     filename: string;
@@ -23,6 +27,48 @@ function countOccurrences(mainStr: string, subStr: string) {
     return matches?.length || 0;
 }
 
+
+interface ProperNames{
+    organizations: string[],
+    names: string[]
+}
+export async function get_proper_name(data: string) {
+    try {
+
+        const response = await axios.post<ProperNames>(`${ process.env.NLP_SERVER_BASE_URL }/get_proper_names_from_text`, data);
+        if (response.status === 200) {
+            return response.data
+        }
+        console.error(response.statusText);
+        return null;
+    } catch (error) {
+        console.error((error as Error).message);
+    }
+}
+
+async function fillAgentOccurrences(data: createReportData,
+                                   id: number) {
+    const foreignAgents = await prisma.foreignAgent.findMany();
+    const lowered = data.text.toLowerCase();
+    const foundProperNames = await get_proper_name(lowered)
+
+    for (let agent of foreignAgents) {
+        const findVariants = (foundProperNames?.names.concat(foundProperNames?.organizations) || [] )
+            .filter(name => agent.variants.includes(name))
+        const occurCount = findVariants.length
+        if (occurCount > 0) {
+            await prisma.agentOccurance.create({
+                data: {
+                    reportId: id,
+                    foreignAgentId: agent.id,
+                    color: generateRandomHexColor(),
+                    count: occurCount,
+                    foundVariants: Array.from(findVariants),
+                }
+            });
+        }
+    }
+}
 
 export async function createReport(data: createReportData) {
 
@@ -59,24 +105,7 @@ export async function createReport(data: createReportData) {
         })
     ]);
     // TODO: when foreign agents lists are updated then find occurrences in reports again
-    const lowered = data.text.toLowerCase();
-    for (let agent of foreignAgents) {
-        let occurCount = 0;
-        for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
-        }
-        if (occurCount > 0) {
-            await prisma.agentOccurance.create({
-                data: {
-                    reportId: id,
-                    foreignAgentId: agent.id,
-                    color: generateRandomHexColor(),
-                    count: occurCount,
-                }
-            });
-            console.log(`${agent.name} found`);
-        }
-    }
+    await fillAgentOccurrences(data, id);
     return id;
 }
 
@@ -113,22 +142,6 @@ export async function recreateAgentOccurrences(reportId: number) {
         console.error("No report find by id");
         return;
     }
-    const foreignAgents = await prisma.foreignAgent.findMany();
-    const lowered = report.text.toLowerCase();
-    for (let agent of foreignAgents) {
-        let occurCount = 0;
-        for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
-        }
-        if (occurCount > 0) {
-            await prisma.agentOccurance.create({
-                data: {
-                    reportId,
-                    foreignAgentId: agent.id,
-                    color: generateRandomHexColor(),
-                    count: occurCount,
-                }
-            });
-        }
-    }
+
+    await fillAgentOccurrences(report, reportId);
 }
