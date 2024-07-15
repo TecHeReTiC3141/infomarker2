@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 import pymorphy2
 
-from ai_searcher import get_proper_name, filter_agents
-
 app = Flask(__name__)
 morph = pymorphy2.MorphAnalyzer()
 
@@ -15,7 +13,7 @@ def find_first_noun_index(words):
 
 
 @app.route('/get_foreign_agent_variants', methods=['POST'])
-def get_foreign_agent_variants():
+def inflect():
     data = request.get_json()
     name, type = data['name'].replace("'", '"'), data['type']
     results = [name]
@@ -35,8 +33,7 @@ def get_foreign_agent_variants():
                 print(word, morph.parse(word)[0].inflect({case}).word)
             # print([morph.parse(word)[0].inflect({case}).word for word in name.split()[:first_noun + 1]], name.split()[first_noun + 1:])
             results.append(
-                ' '.join(
-                    [morph.parse(word)[0].inflect({case}).word for word in words_to_inflect] + words_not_to_inflect))
+                ' '.join([morph.parse(word)[0].inflect({case}).word for word in words_to_inflect] + words_not_to_inflect))
             inflected_abbrev = morph.parse(abbrev)[0].inflect({case})
             if inflected_abbrev:
                 results.append(' ' + inflected_abbrev.word.upper() + ' ')
@@ -59,25 +56,6 @@ def get_foreign_agent_variants():
             results.append(morph.parse(firstname)[0].inflect({case}).word + ' '
                            + morph.parse(lastname)[0].inflect({case}).word)
     return jsonify(sorted(results, key=lambda x: len(x), reverse=True))
-
-
-@app.route('/get_proper_names_from_text', methods=['POST'])
-def get_proper_names_from_text():
-    text = request.data.decode('utf-8')
-    organizations, names = get_proper_name(text)
-    return {
-        "organizations": organizations,
-        "names": names
-    }
-
-
-@app.route('/get_foreign_agents_from_text', methods=['POST'])
-def get_foreign_agents_from_text():
-    text = request.data.decode('utf-8')
-    agents = filter_agents(text)
-    return {
-        "agents": agents
-    }
 
 
 if __name__ == '__main__':

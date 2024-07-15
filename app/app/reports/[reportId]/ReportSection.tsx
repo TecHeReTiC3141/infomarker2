@@ -45,21 +45,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
 
-    async function generatePdf() {
-        const reportElement = downloadRef.current;
-
-        const canvas = await html2canvas(reportElement!);
-        const imgData = canvas.toDataURL('image/png');
-
-        const pdf = new jsPDF('p', 'px', 'a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        console.log("PDF width", pdfWidth);
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.addImage(imgData, 'PNG', 15, 15, pdfWidth - 25, pdfHeight);
-        pdf.save(`Отчет по файлу ${report.filename}.pdf`);
-    }
+    console.log(activeAgentId, activeAgentIndex, agentIndexes);
 
     async function generatePdf() {
         const reportElement = downloadRef.current;
@@ -83,21 +69,19 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
         setAgentOccurCounts({});
         agentIndexes.current = {};
         for (let i = 0; i < marks.length; ++i) {
-            const mark = marks[i];
+            const mark = marks[ i ];
             occurLoop:
                 for (let occurrence of (occurrences || [])) {
-                    const { foreignAgent ,foundVariants } = occurrence;
-                        const lengthSortReversed = (a: string, b: string) => (a.length > b.length ? -1 : 1)
-                        for (let variant of foundVariants.sort(lengthSortReversed)) {
-                            if (mark.textContent?.toLowerCase() === variant) {
-                                agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
-                                let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
-                                mark.dataset.index = curIndex.toString();
-                                mark.dataset.agentId = occurrence.foreignAgentId.toString();
-                                setAgentOccurCounts(prev =>
-                                    ({ ...prev, [ foreignAgent.id ]: (prev[ foreignAgent.id ] || 0) + 1 }));
-                                break occurLoop;
-                            }
+                    const { foreignAgent } = occurrence;
+                    for (let variant of foreignAgent?.variants) {
+                        if (mark.textContent?.toLowerCase() === variant) {
+                            agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
+                            let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
+                            mark.dataset.index = curIndex.toString();
+                            mark.dataset.agentId = occurrence.foreignAgentId.toString();
+                            setAgentOccurCounts(prev =>
+                                ({ ...prev, [ foreignAgent.id ]: (prev[ foreignAgent.id ] || 0) + 1 }));
+                            break occurLoop;
                         }
                     }
                 }
@@ -140,6 +124,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         }
                     }
                 }
+
         }
     }
 
