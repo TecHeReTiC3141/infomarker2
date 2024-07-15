@@ -6,7 +6,7 @@ import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 import FoundAgentInfo from "@/app/app/reports/[reportId]/components/FoundOccurInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import SelectOccurVariant from "@/app/app/reports/[reportId]/components/SelectOccurVariant";
 import { IconType } from "react-icons";
 import { BsExclamationCircle } from "react-icons/bs";
@@ -35,7 +35,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     const sectionRef = useRef<HTMLParagraphElement>(null);
 
-    const [ agentOccurCounts, setAgentOccurCounts ] = useState<{ [ key: string ]: number }>({});
+    const [ agentOccurCounts, setAgentOccurCounts ] = useState<Record<string, number>>({});
 
     const agentIndexes = useRef<{ [ key: number ]: number[] }>({});
 
@@ -44,6 +44,22 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     const [ activeAgentIndex, setActiveAgentIndex ] = useState<number>(-1);
 
     const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
+
+    async function generatePdf() {
+        const reportElement = downloadRef.current;
+
+        const canvas = await html2canvas(reportElement!);
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdf = new jsPDF('p', 'px', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        console.log("PDF width", pdfWidth);
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 15, 15, pdfWidth - 25, pdfHeight);
+        pdf.save(`Отчет по файлу ${report.filename}.pdf`);
+    }
 
     async function generatePdf() {
         const reportElement = downloadRef.current;
@@ -84,6 +100,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             }
                         }
                     }
+                }
         }
     }, [ occurrences ]);
 
@@ -102,20 +119,17 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             occurrences?.filter(occurrence => !agentOccurCounts[ occurrence.foreignAgent.id ]),
         [ agentOccurCounts, occurrences ]);
 
-    // effect for styles and interactivity of marks in text section
-    useEffect(() => {
-        const marks = sectionRef.current?.querySelectorAll("mark") || [];
+    function setMarkStyles(ref: RefObject<HTMLDivElement>, occurrences: OccurrenceWithAgent[] | undefined) {
+        const marks = ref.current?.querySelectorAll("mark") || [];
         for (let i = 0; i < marks.length; ++i) {
             const mark = marks[ i ];
             occurLoop:
-                for (let occurrence of (filteredOccurrences || [])) {
+                for (let occurrence of (occurrences || [])) {
                     const { foreignAgent } = occurrence;
                     for (let variant of foreignAgent?.variants) {
                         if (mark.textContent?.toLowerCase() === variant) {
                             mark.style.background = occurrence.color;
                             mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
-                            // TODO: implement storing of possible occurrences
-
                             // Fix error with active when mark is clicked
                             mark.addEventListener("click", () => {
                                 console.log(mark.dataset.agentId, mark.dataset.index, Number(mark.dataset.index) ?? -1);
@@ -127,7 +141,13 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     }
                 }
         }
-    }, [ filteredOccurrences ]);
+    }
+
+    // effect for styles and interactivity of marks in text section
+    useEffect(() => {
+        setMarkStyles(sectionRef, filteredOccurrences);
+        setMarkStyles(downloadRef, foundOccurrences);
+    }, [ filteredOccurrences, foundOccurrences ]);
 
 
     useEffect(() => {
@@ -199,7 +219,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 </div>
             </div>
             <ReportDownload ref={downloadRef} report={report} foundOccurrences={foundOccurrences}
-                            possibleOccurrences={possibleOccurrences}/>
+                            possibleOccurrences={possibleOccurrences} agentCounts={agentOccurCounts}/>
         </>
     )
 

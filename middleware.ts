@@ -10,7 +10,5 @@ export default withAuth({
 export const config = {
     matcher: [
         "/app/:path*",
-        "/reports/:path*",
-        "/load-doc",
     ]
 }

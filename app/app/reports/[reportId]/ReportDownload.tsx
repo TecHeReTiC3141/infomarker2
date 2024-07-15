@@ -11,12 +11,14 @@ interface ReportDownloadProps {
     report: Report,
     foundOccurrences: OccurrenceWithAgent[] | undefined,
     possibleOccurrences: OccurrenceWithAgent[] | undefined,
+    agentCounts: Record<string, number>,
 }
 
 export const ReportDownload = forwardRef(function ReportDownload({
                                                                      report,
                                                                      foundOccurrences,
-                                                                     possibleOccurrences
+                                                                     possibleOccurrences,
+                                                                     agentCounts,
                                                                  }: ReportDownloadProps,
                                                                  ref: ForwardedRef<HTMLParagraphElement>) {
     return (
@@ -47,7 +49,7 @@ export const ReportDownload = forwardRef(function ReportDownload({
                             <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
                                             isActive={false}
                                             activeAgentIndex={-1}
-                                            counts={{}} setActiveAgentId={() => {
+                                            counts={agentCounts} setActiveAgentId={() => {
                             }}
                                             setActiveAgentIndex={() => {
                                             }}/>))
@@ -64,7 +66,7 @@ export const ReportDownload = forwardRef(function ReportDownload({
                         {possibleOccurrences?.map((occurrence) => (
                             <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
                                                isActive={false}
-                                               counts={{}} setActiveAgentId={() => {
+                                               counts={agentCounts} setActiveAgentId={() => {
                             }}
                                                setActiveAgentIndex={() => {
                                                }}/>))

@@ -24,14 +24,12 @@ export default function Input({ label, id, type, required, register, errors, dis
             </label>
             <div className="mt-2">
                 <input type={type} id={id} autoComplete={id} disabled={disabled}
-                       className={clsx(`form-input block w-full rounded-md border-0 py-1 
-                       text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 indent-2
-                        placeholder:text-gray-400 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6`,
-                           errors[ id ]?.message ? "focus:ring-error" : "focus:ring-sky-600",
+                       className={clsx("input input-bordered outline-none focus:outline-none w-full",
+                           errors[ id ]?.message && "input-error",
                            disabled && "opacity-50 cursor-default",
                        )}
                        {...register(id, { required })}/>
-                {errors[ id ] !== undefined && <p className="text-error">{errors[ id ]?.message?.toString()}</p>}
+                {errors[ id ] !== undefined && <p className="text-error text-sm pt-1">{errors[ id ]?.message?.toString()}</p>}
             </div>
         </div>
     )

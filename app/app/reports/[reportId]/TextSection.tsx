@@ -3,6 +3,7 @@ import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { ForwardedRef, forwardRef } from "react";
 import { util } from "zod";
 import find = util.find;
+import { createPortal } from "react-dom";
 
 interface TextSectionProps {
     text: string,
