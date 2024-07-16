@@ -41,6 +41,7 @@ const samples = {
 }
 
 async function main() {
+
     await prisma.foreignAgent.deleteMany();
     for (let person of samples.people) {
         await createForeignAgent({
