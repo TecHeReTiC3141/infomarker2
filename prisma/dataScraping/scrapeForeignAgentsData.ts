@@ -51,7 +51,7 @@ async function getExtremistOrganizations() {
         .filter(org => /^[1-9][0-9]{0,2}\.\s/.test(org)).map(s => s.split(".")[1]);
 }
 
-async function getForeignAgents() {
+export async function getForeignAgents() {
     const { data } = await axios.get<ArrayBuffer>("https://minjust.gov.ru/uploaded/files/kopiya-reestr-inostrannyih-agentov-12-07-2024.pdf", {
         responseType: "arraybuffer",
         httpsAgent: new https.Agent({
@@ -65,7 +65,9 @@ async function getForeignAgents() {
     const foreignAgents = rows.map(row => row[1]);
     console.log(foreignAgents);
 
-    await fs.rm("./foreign-agents-list.pdf");
+
+    // The next line crashing
+    // await fs.rm("./foreign-agents-list.pdf");
     return foreignAgents;
 }
 
@@ -82,6 +84,7 @@ export async function getForeignOrganizationsData() {
         return organizations;
     } catch (error) {
         console.error('Ошибка при обновлении данных:', error);
+        return []
     }
 }
 

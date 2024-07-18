@@ -1,59 +1,43 @@
 import prisma from "@/app/lib/db/prisma";
-import { createReport, recreateAgentOccurrences } from "@/app/lib/db/report";
+import { getForeignAgents, getForeignOrganizationsData } from "@/prisma/dataScraping/scrapeForeignAgentsData";
 import { createForeignAgent } from "@/app/lib/db/foreignAgent";
+import { recreateAgentOccurrences } from "@/app/lib/db/report";
 
-const samples = {
-    "people": [
-        "Иванов Сергей Петрович",
-        "Петров Николай Александрович",
-        "Сидоров Михаил Владимирович",
-        "Кузнецов Дмитрий Николаевич",
-        "Смирнов Александр Михайлович",
-        "Попов Иван Сергеевич",
-        "Лебедев Владимир Иванович",
-        "Козлов Петр Дмитриевич",
-        "Иванова Ольга Сергеевна",
-        "Петрова Анна Николаевна"
-    ],
-    "organizations": [
-        "Исламское государство",
-        "Федеральный государственный театр юного зрителя",
-        "Фирма Разработок",
-        "Корпорация Инноваций",
-        "Ассоциация Проектов",
-        "Концерн Систем",
-        "Группа Услуг",
-        "Холдинг Программ",
-        "Трест Решений",
-        "Компания Инноваций",
-        "Корпорация Систем",
-        "Республиканская общественная школа искусств 'Новые Горизонты'",
-        "Национальная молодежная лига творчества 'Радуга'",
-        "Государственный молодежный театр 'Звездный свет'",
-        "Международный центр культурного развития 'Гармония'",
-        "Общественная академия талантов 'Солнечный круг'",
-        "Федерация художественных кружков 'Вдохновение'",
-        "Культурно-просветительное объединение 'АртПланета'",
-        "Региональный детский хор 'Сказка'",
-        "Объединение творческой молодежи 'Энергия идеи'",
-        "Детско-юношеский центр искусств 'Волшебство'"
-    ]
+async function main(){
+    await update_agents()
 }
 
-async function main() {
+export async function update_agents() {
+    let organizations = await getForeignOrganizationsData();
+    let agents = await getForeignAgents();
+    organizations = organizations.filter(org => org && true );
+    agents = agents.filter(agent => agent && true );
+    const agent_filter = (s: string) => s
+        .split(" ").length == 3 && // Only Surname+name+lastname
+        s.replaceAll("«", "").length == s.length // count of « == 0
+    organizations.push(...agents.filter(s => !agent_filter(s)));
+    agents = agents.filter(agent_filter);
+
+    const regex_full_bracket = RegExp(/\(.*?\)/gm)
+    const regex_half_bracket = RegExp(/\([^(]*?$/gm)
+    organizations = organizations.map(org => org.replace(regex_full_bracket, ''));
+    organizations = organizations.map(org => org.replace(regex_half_bracket, ''));
+    agents = agents.map(agent => agent.replace(regex_full_bracket, ''));
+    agents = agents.map(agent => agent.replace(regex_half_bracket, ''));
+
 
     await prisma.foreignAgent.deleteMany();
-    for (let person of samples.people) {
-        await createForeignAgent({
-            name: person,
-            type: "PERSON",
-        })
-    }
-    for (let organization of samples.organizations) {
+    for (let organization of organizations) {
         await createForeignAgent({
             name: organization,
             type: "ORGANISATION",
         });
+    }
+    for (let person of agents) {
+        await createForeignAgent({
+            name: person,
+            type: "PERSON",
+        })
     }
     const reports = await prisma.report.findMany();
     await Promise.all(
