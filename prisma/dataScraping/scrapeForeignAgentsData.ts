@@ -52,6 +52,7 @@ async function getExtremistOrganizations() {
 }
 
 export async function getForeignAgents() {
+    const tableHeader = "Полное наименование /ФИО , прежнее ФИО"
     const { data } = await axios.get<ArrayBuffer>("https://minjust.gov.ru/uploaded/files/kopiya-reestr-inostrannyih-agentov-12-07-2024.pdf", {
         responseType: "arraybuffer",
         httpsAgent: new https.Agent({
@@ -62,7 +63,11 @@ export async function getForeignAgents() {
     await fs.writeFile("./foreign-agents-list.pdf", Buffer.from(data));
     let parser = new PdfDataParser({url: "./foreign-agents-list.pdf"});
     const rows: string[][] = await parser.parse();
-    const foreignAgents = rows.map(row => row[1]);
+    const foreignAgents = rows
+        .map(row => row[1])
+        .filter(row => row && true)
+        .map(row => row.trim())
+        .filter(s => s != tableHeader);
     console.log(foreignAgents);
 
 
@@ -73,12 +78,13 @@ export async function getForeignAgents() {
 
 export async function getForeignOrganizationsData() {
     try {
+        const tableHeader = "Полное наименование /ФИО , прежнее ФИО"
         const results = await Promise.all([
             getExtremistOrganizations(),
             getTerroristOrganizations(),
             getUndesiredOrganizations(),
         ]);
-        const organizations = results.flat().map(org => org.trim());
+        const organizations = results.flat().map(org => org.trim()).filter(s => s != tableHeader);
         console.log("Loaded organizations: ", organizations.length);
         console.log('Данные успешно обновлены!');
         return organizations;
