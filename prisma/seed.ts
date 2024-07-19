@@ -4,26 +4,26 @@ import { createForeignAgent } from "@/app/lib/db/foreignAgent";
 import { recreateAgentOccurrences } from "@/app/lib/db/report";
 
 async function main(){
-    await update_agents()
+    await updateAgents()
 }
 
-export async function update_agents() {
+export async function updateAgents() {
     let organizations = await getForeignOrganizationsData();
     let agents = await getForeignAgents();
     organizations = organizations.filter(org => org && true );
     agents = agents.filter(agent => agent && true );
-    const agent_filter = (s: string) => s
+    const agentFilter = (s: string) => s
         .split(" ").length == 3 && // Only Surname+name+lastname
         s.replaceAll("«", "").length == s.length // count of « == 0
-    organizations.push(...agents.filter(s => !agent_filter(s)));
-    agents = agents.filter(agent_filter);
+    organizations.push(...agents.filter(s => !agentFilter(s)));
+    agents = agents.filter(agentFilter);
 
-    const regex_full_bracket = RegExp(/\(.*?\)/gm)
-    const regex_half_bracket = RegExp(/\([^(]*?$/gm)
-    organizations = organizations.map(org => org.replace(regex_full_bracket, ''));
-    organizations = organizations.map(org => org.replace(regex_half_bracket, ''));
-    agents = agents.map(agent => agent.replace(regex_full_bracket, ''));
-    agents = agents.map(agent => agent.replace(regex_half_bracket, ''));
+    const regexFullBrackets = RegExp(/\(.*?\)/gm)
+    const regexHalfBracket = RegExp(/\([^(]*?$/gm)
+    organizations = organizations.map(org => org.replace(regexFullBrackets, ''));
+    organizations = organizations.map(org => org.replace(regexHalfBracket, ''));
+    agents = agents.map(agent => agent.replace(regexFullBrackets, ''));
+    agents = agents.map(agent => agent.replace(regexHalfBracket, ''));
 
 
     await prisma.foreignAgent.deleteMany();
