@@ -48,7 +48,7 @@ async function getExtremistOrganizations() {
     // Пример извлечения данных. Настрой под структуру HTML внешнего сайта.
     return $(".doc p")
         .map((_, element) => $(element).text().trim()).toArray()
-        .filter(org => /^[1-9][0-9]{0,2}\.\s/.test(org)).map(s => s.split(".")[1]);
+        .filter(org => /^[1-9][0-9]{0,2}\.\s/.test(org)).map(s => s.split(".", 1)[1]);
 }
 
 export async function getForeignAgents() {
@@ -59,7 +59,6 @@ export async function getForeignAgents() {
             rejectUnauthorized: false
         }),
     });
-    console.log(typeof data);
     await fs.writeFile("./foreign-agents-list.pdf", Buffer.from(data));
     let parser = new PdfDataParser({url: "./foreign-agents-list.pdf"});
     const rows: string[][] = await parser.parse();
@@ -84,9 +83,8 @@ export async function getForeignOrganizationsData() {
             getTerroristOrganizations(),
             getUndesiredOrganizations(),
         ]);
-        const organizations = results.flat().map(org => org.trim()).filter(s => s != tableHeader);
+        const organizations = results.flat().filter(org => !!org).map(org => org.trim()).filter(s => s != tableHeader);
         console.log("Loaded organizations: ", organizations.length);
-        console.log('Данные успешно обновлены!');
         return organizations;
     } catch (error) {
         console.error('Ошибка при обновлении данных:', error);
