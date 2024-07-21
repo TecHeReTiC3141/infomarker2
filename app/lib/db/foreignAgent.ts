@@ -15,7 +15,7 @@ export async function createForeignAgent(data: createForeignAgentData) {
         });
         if (response.status === 200) {
             const variants = response.data.map(va => va.toLowerCase());
-            console.log(variants);
+            // console.log(variants);
             return await prisma?.foreignAgent.create({
                 data: {
                     ...data,
@@ -26,6 +26,6 @@ export async function createForeignAgent(data: createForeignAgentData) {
         console.error(response.statusText);
         return null;
     } catch (error) {
-        console.error((error as Error).message);
+        console.error("Не удалось просклонять: ", data.name)
     }
 }
