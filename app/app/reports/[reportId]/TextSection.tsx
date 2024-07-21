@@ -1,7 +1,6 @@
 import Highlighter from "react-highlight-words";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { ForwardedRef, forwardRef } from "react";
-import { createPortal } from "react-dom";
 
 interface TextSectionProps {
     text: string,
