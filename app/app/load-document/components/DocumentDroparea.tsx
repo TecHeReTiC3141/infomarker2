@@ -85,8 +85,8 @@ export default function DocumentDroparea() {
         }
     }
 
-    const hasAccess = useMemo(() => user && (user.checksLeft > 0 || user.role === "ADMIN"), [ user ]);
-
+    // const hasAccess = useMemo(() => user && (user.checksLeft > 0 || user.role === "ADMIN"), [ user ]);
+    const hasAccess = true;
     return (
         <div className="w-full flex flex-col items-center gap-y-3">
             {hasAccess ?

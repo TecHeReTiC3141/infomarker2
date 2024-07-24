@@ -121,6 +121,7 @@ model AgentOccurance {
     report         Report       @relation(fields: [reportId], references: [id], onDelete: Cascade)
     foreignAgentId Int
     foreignAgent   ForeignAgent @relation(fields: [foreignAgentId], references: [id], onDelete: Cascade)
+    foundVariants  String[]
 
     @@map("agent_occurances")
 }
