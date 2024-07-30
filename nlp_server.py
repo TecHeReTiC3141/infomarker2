@@ -73,7 +73,6 @@ def inflect():
                 results.add(morph_org_to_case(org_words_to_inflect, org_words_not_to_inflect, case))
     elif type == "PERSON":
         surname, name, patronym = name.split()
-        print(surname, name, patronym)
 
         for case in cases:
             results.update(morph_name_to_case(surname, name, patronym, case))

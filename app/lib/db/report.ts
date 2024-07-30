@@ -57,16 +57,7 @@ export async function createReport(data: createReportData) {
     const session = await getServerSession(authOptions) as Session;
     const user = session.user;
 
-    const { checksLeft, role } = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-            checksLeft: true,
-            role: true,
-        }
-    }) as User;
-
     // if (checksLeft <= 0 && role === UserRole.USER) throw new Error("Out of checks for this user");
-    const foreignAgents = await prisma.foreignAgent.findMany();
     const [ { id }, ] = await prisma.$transaction([
         prisma.report.create({
             data: {

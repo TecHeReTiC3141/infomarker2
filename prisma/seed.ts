@@ -51,6 +51,7 @@ export async function updateAgents() {
         });
         personsBar.increment();
     }
+    personsBar.stop()
     console.log("Persons have been created");
     const reports = await prisma.report.findMany();
     console.log("Recreating agent occurrences in all reports...");
