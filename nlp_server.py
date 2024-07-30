@@ -29,18 +29,21 @@ def inflect_name_part(name_part: str, case: str) -> str:
     return inflected_name_part.word if inflected_name_part else name_part
 
 
-def morph_name_to_case(firstname: str,
-                       lastname: str,
+def morph_name_to_case(surname: str,
+                       name: str,
                        patronym: str,
                        case: str) -> list[str]:
-    inflected_firstname = inflect_name_part(firstname, case)
-    inflected_lastname = inflect_name_part(lastname, case)
+    inflected_surname = inflect_name_part(surname, case)
+    inflected_name = inflect_name_part(name, case)
     inflected_patronym = inflect_name_part(patronym, case)
     return [
-        inflected_firstname,
-        ' '.join([inflected_firstname, inflected_lastname, inflected_patronym]),
-        f"{inflected_firstname} {lastname[0]}.{patronym[0]}.",
-        inflected_firstname + " " + inflected_lastname
+        inflected_surname,  # Иванов
+        ' '.join([inflected_surname, inflected_name, inflected_patronym]),  # Иванов Иван Иванович
+        ' '.join([inflected_name, inflected_patronym, inflected_surname]),  # Иван Иванович Иванов
+        f"{inflected_surname} {name[0]}.{patronym[0]}.",  # Иванов И.И.
+        inflected_surname + " " + inflected_name,   # Иванов Иван
+        inflected_name + " " + inflected_surname,   # Иван Иванов
+        inflected_name + " " + inflected_patronym   # Иван Иванович
     ]
 
 
@@ -69,9 +72,11 @@ def inflect():
             if has_org_name:
                 results.add(morph_org_to_case(org_words_to_inflect, org_words_not_to_inflect, case))
     elif type == "PERSON":
-        firstname, lastname, patronym = name.split()
+        surname, name, patronym = name.split()
+        print(surname, name, patronym)
+
         for case in cases:
-            results.update(morph_name_to_case(firstname, lastname, patronym, case))
+            results.update(morph_name_to_case(surname, name, patronym, case))
     return jsonify(sorted(results, key=lambda x: len(x), reverse=True))
 
 
