@@ -9,7 +9,6 @@ interface createForeignAgentData {
 
 export async function createForeignAgent(data: createForeignAgentData) {
     try {
-
         const response = await axios.post<string[]>(`${process.env.NLP_SERVER_BASE_URL}/get_foreign_agent_variants`, {
             ...data,
         });
@@ -26,6 +25,6 @@ export async function createForeignAgent(data: createForeignAgentData) {
         console.error(response.statusText);
         return null;
     } catch (error) {
-        console.error("Не удалось просклонять: ", data.name)
+        console.error("Не удалось просклонять: ", data.name, (error as Error).message);
     }
 }

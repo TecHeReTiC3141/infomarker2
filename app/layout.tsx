@@ -7,6 +7,7 @@ import Footer from "@/app/app/load-document/components/Footer";
 import clsx from "clsx";
 import SessionProvider from "@/app/context/SessionContext";
 import ToasterContext from "@/app/context/ToasterContext";
+import "@/prisma/dataScraping/scrapeCronJob";
 
 const inter = Inter({ subsets: [ "latin" ] });
 
