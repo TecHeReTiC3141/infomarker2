@@ -75,7 +75,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     const { foreignAgent, foundVariants } = occurrence;
                     const lengthSortReversed = (a: string, b: string) => (a.length > b.length ? -1 : 1)
                     for (let variant of foundVariants.sort(lengthSortReversed)) {
-                        if (mark.textContent?.toLowerCase() === variant) {
+                        if (mark.textContent === variant) {
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
                             mark.dataset.index = curIndex.toString();
@@ -112,7 +112,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 for (let occurrence of (occurrences || [])) {
                     const { foreignAgent, foundVariants } = occurrence;
                     for (let variant of foundVariants) {
-                        if (mark.textContent?.toLowerCase() === variant) {
+                        if (mark.textContent === variant) {
                             mark.style.background = occurrence.color;
                             mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
                             // Fix error with active when mark is clicked
@@ -164,6 +164,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     </div>
                     <TextSection text={report.text} occurrences={filteredOccurrences}
                                  ref={sectionRef}
+                                 activeOccurSection={activeOccurSection}
                                  activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
                 </div>
                 <div className="flex-[2] min-w-72 flex flex-col gap-y-3">

@@ -64,6 +64,7 @@ def inflect():
         has_org_name = '"' in name
         if has_org_name:
             org_name = name.split('"')[1].replace('"', '')
+            results.add(org_name)   # один результат с правильной капитализацией букв
             first_noun = find_first_noun_index(org_name.split())
             org_words_to_inflect = org_name.split()[:first_noun + 1]
             org_words_not_to_inflect = org_name.split()[first_noun + 1:]

@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from 'cheerio';
 import * as https from "https";
-import fs from "node:fs/promises";
 
 // @ts-ignore
 import { PdfDataParser } from "pdf-data-parser";
@@ -65,25 +64,20 @@ export async function getForeignAgents() {
         trim: true
     });
     const rows: string[][] = await parser.parse();
-    console.log(rows.map(row => row[1]));
-    const foreignAgents = rows
+    return rows
         .map(row => row[1])
         .filter(row => row && true)
         .map(row => row.trim());
-    console.log(foreignAgents);
-
-    return foreignAgents;
 }
 
 export async function getForeignOrganizationsData() {
     try {
-        const tableHeader = "Полное наименование /ФИО , прежнее ФИО"
         const results = await Promise.all([
             getExtremistOrganizations(),
             getTerroristOrganizations(),
             getUndesiredOrganizations(),
         ]);
-        const organizations = results.flat().filter(org => !!org).map(org => org.trim()).filter(s => s != tableHeader);
+        const organizations = results.flat().filter(org => !!org).map(org => org.trim());
         console.log("Loaded organizations: ", organizations.length);
         return organizations;
     } catch ( error ) {
@@ -92,5 +86,5 @@ export async function getForeignOrganizationsData() {
     }
 }
 
-getForeignAgents().then(() => console.log("List read successfully"));
+// getForeignAgents().then(() => console.log("List read successfully"));
 // getForeignAgentsData().then(() => console.log("Scrape success"));
