@@ -5,7 +5,6 @@ import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
 import { Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
-import Fuse, { IFuseOptions } from "fuse.js";
 
 interface createReportData {
     filename: string;
