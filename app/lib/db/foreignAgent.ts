@@ -9,13 +9,12 @@ interface createForeignAgentData {
 
 export async function createForeignAgent(data: createForeignAgentData) {
     try {
-
         const response = await axios.post<string[]>(`${process.env.NLP_SERVER_BASE_URL}/get_foreign_agent_variants`, {
             ...data,
         });
         if (response.status === 200) {
             const variants = response.data.map(va => va.toLowerCase());
-            console.log(variants);
+            // console.log(variants);
             return await prisma?.foreignAgent.create({
                 data: {
                     ...data,
@@ -26,6 +25,6 @@ export async function createForeignAgent(data: createForeignAgentData) {
         console.error(response.statusText);
         return null;
     } catch (error) {
-        console.error((error as Error).message);
+        console.error("Не удалось просклонять: ", data.name, (error as Error).message);
     }
 }

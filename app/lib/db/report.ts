@@ -23,22 +23,41 @@ function countOccurrences(mainStr: string, subStr: string) {
     return matches?.length || 0;
 }
 
+async function fillAgentOccurrences(data: createReportData,
+                                    id: number) {
+    const foreignAgents = await prisma.foreignAgent.findMany();
+    const lowered = data.text.toLowerCase();
+    for (let agent of foreignAgents) {
+        let occurCount = 0;
+        let findVariants: Set<string> = new Set();
+        for (let variant of agent.variants) {
+            let occurCountForVariant = countOccurrences(lowered, variant);
+            if (occurCountForVariant > 0){
+                occurCount += occurCountForVariant;
+                findVariants.add(variant)
+            }
+        }
+        if (occurCount > 0) {
+            await prisma.agentOccurance.create({
+                data: {
+                    reportId: id,
+                    foreignAgentId: agent.id,
+                    color: generateRandomHexColor(),
+                    count: occurCount,
+                    foundVariants: Array.from(findVariants),
+                }
+            });
+        }
+    }
+}
+
 
 export async function createReport(data: createReportData) {
 
     const session = await getServerSession(authOptions) as Session;
     const user = session.user;
 
-    const { checksLeft, role } = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-            checksLeft: true,
-            role: true,
-        }
-    }) as User;
-
-    if (checksLeft <= 0 && role === UserRole.USER) throw new Error("Out of checks for this user");
-    const foreignAgents = await prisma.foreignAgent.findMany();
+    // if (checksLeft <= 0 && role === UserRole.USER) throw new Error("Out of checks for this user");
     const [ { id }, ] = await prisma.$transaction([
         prisma.report.create({
             data: {
@@ -58,25 +77,7 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
-    // TODO: when foreign agents lists are updated then find occurrences in reports again
-    const lowered = data.text.toLowerCase();
-    for (let agent of foreignAgents) {
-        let occurCount = 0;
-        for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
-        }
-        if (occurCount > 0) {
-            await prisma.agentOccurance.create({
-                data: {
-                    reportId: id,
-                    foreignAgentId: agent.id,
-                    color: generateRandomHexColor(),
-                    count: occurCount,
-                }
-            });
-            console.log(`${agent.name} found`);
-        }
-    }
+    await fillAgentOccurrences(data, id);
     return id;
 }
 
@@ -113,22 +114,6 @@ export async function recreateAgentOccurrences(reportId: number) {
         console.error("No report find by id");
         return;
     }
-    const foreignAgents = await prisma.foreignAgent.findMany();
-    const lowered = report.text.toLowerCase();
-    for (let agent of foreignAgents) {
-        let occurCount = 0;
-        for (let variant of agent.variants) {
-            occurCount += countOccurrences(lowered, variant);
-        }
-        if (occurCount > 0) {
-            await prisma.agentOccurance.create({
-                data: {
-                    reportId,
-                    foreignAgentId: agent.id,
-                    color: generateRandomHexColor(),
-                    count: occurCount,
-                }
-            });
-        }
-    }
+    await fillAgentOccurrences(report, reportId);
+
 }
