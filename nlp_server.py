@@ -26,7 +26,8 @@ def morph_org_to_case(words_to_inflect: list[str],
 # Not all parts cant be morphed (example: Дзядко, Шац, Дудь)
 def inflect_name_part(name_part: str, case: str) -> str:
     inflected_name_part = morph.parse(name_part)[0].inflect({case})
-    return inflected_name_part.word if inflected_name_part else name_part
+    result = inflected_name_part.word if inflected_name_part else name_part
+    return result.capitalize()
 
 
 def morph_name_to_case(surname: str,

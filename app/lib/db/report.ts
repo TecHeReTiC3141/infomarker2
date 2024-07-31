@@ -5,19 +5,20 @@ import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
 import { Report, User, UserRole } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import Fuse, { IFuseOptions } from "fuse.js";
 
 interface createReportData {
     filename: string;
     text: string;
 }
 
-function countOccurrences(mainStr: string, subStr: string) {
+function countOccurrences(full_text: string, variant: string) {
     // Escape special characters in the substring and create a regular expression
-    const escapedSubStr = subStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedSubStr = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedSubStr, 'g');
 
     // Use match() with the regular expression to find all occurrences
-    const matches = mainStr.match(regex);
+    const matches = full_text.match(regex);
 
     // Return the number of matches found
     return matches?.length || 0;
