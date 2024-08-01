@@ -27,7 +27,9 @@ export const ReportDownload = forwardRef(function ReportDownload({
             <div ref={ref} className="flex gap-x-8 fixed top-0 left-[150vw] w-full">
                 <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[6 relative">
                     <h3 className="text-2xl font-bold">Отчет по файлу {report.filename}</h3>
-                    <TextSection text={report.text} occurrences={foundOccurrences}
+                    <TextSection text={report.text}
+                                 occurrences={foundOccurrences}
+                                 activeOccurSection={"found"}
                                  activeIndex={-1}/>
                 </div>
                 <div className="flex-[2] min-w-72 flex flex-col gap-y-3">
