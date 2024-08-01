@@ -56,7 +56,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
         const pdf = new jsPDF('p', 'px', 'a4');
         const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        console.log("PDF width", pdfWidth);
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
         pdf.addImage(imgData, 'PNG', 15, 15, pdfWidth - 25, pdfHeight);
@@ -149,6 +148,12 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             }
         }
     }, [ activeAgentId, activeAgentIndex ]);
+
+    useEffect(() => {
+        const activeAgent = document.querySelector(".active-agent");
+        if (!activeAgent) return;
+        activeAgent.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, [ activeAgentId ]);
 
     return (
         <>

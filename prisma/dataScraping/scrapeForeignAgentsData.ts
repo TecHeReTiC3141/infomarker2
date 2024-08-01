@@ -92,5 +92,5 @@ export async function getForeignOrganizationsData() {
     }
 }
 
-getForeignAgents().then(() => console.log("List read successfully"));
+// getForeignAgents().then(() => console.log("List read successfully"));
 // getForeignAgentsData().then(() => console.log("Scrape success"));
