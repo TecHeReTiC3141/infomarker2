@@ -14,7 +14,7 @@ export interface SectionButtonProps {
 
 export default function SectionButton({ text, section, disabled = false }: SectionButtonProps) {
     const pathname = usePathname();
-    // TODO: add text that app can be slow during first redirect to page
+    // TODO: make custom link component which triggers toast message
 
     const isActive = pathname.includes(section);
 
@@ -38,7 +38,9 @@ export default function SectionButton({ text, section, disabled = false }: Secti
                     <Link href={`/app/${section}`} onClick={() => {
                         setLoading(true);
                         setLoadingTimeout(setTimeout(
-                            () => toast.loading("При первой загрузке страницы возможна задержка при переходе, при последующих загрузках ее не будет наблюдаться"), 1000));
+                            () => toast.loading("Возможна задержка при первом переходе на страницу, но при последующих ее не будет наблюдаться",
+                                { duration: 3000 },
+                            ), 1000));
                     }}
                           className={clsx("btn btn-lg w-40 lg:w-48 xl:w-56 justify-between items-center",
                               isActive ? "btn-primary" : "btn-neutral")}>

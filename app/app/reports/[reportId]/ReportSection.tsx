@@ -158,7 +158,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     return (
         <>
             <div className="flex gap-x-8">
-                <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[4] relative">
+                <div className="max-w-[50vw] w-full h-full flex flex-col gap-y-3 flex-[4] relative">
                     <Link href="/app/reports" className="flex gap-x-2 text-sm items-center hover:underline">
                         <FaArrowLeftLong size={16}/> Назад
                     </Link>

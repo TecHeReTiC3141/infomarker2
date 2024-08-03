@@ -3,7 +3,7 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
-import { Report, User, UserRole } from "@prisma/client";
+import { Report } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
 
 interface createReportData {
@@ -11,13 +11,13 @@ interface createReportData {
     text: string;
 }
 
-function countOccurrences(full_text: string, variant: string) {
+function countOccurrences(fullText: string, variant: string) {
     // Escape special characters in the substring and create a regular expression
     const escapedSubStr = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedSubStr, 'gi');
 
     // Use match() with the regular expression to find all occurrences
-    const matches = full_text.match(regex);
+    const matches = fullText.match(regex);
 
     // Return the number of matches found
     return matches?.length || 0;

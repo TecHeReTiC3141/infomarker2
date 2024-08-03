@@ -10,6 +10,25 @@ interface TextSectionProps {
     activeOccurSection: keyof typeof occurVariants,
 }
 
+function findMatches(regex: RegExp, textToHighlight: string, chunks: Chunk[]) {
+    let match;
+    while ((match = regex.exec(textToHighlight))) {
+        let start = match.index
+        let end = regex.lastIndex
+        // We do not return zero-length matches
+        if (end > start) {
+            chunks.push({ start, end })
+        }
+
+        // Prevent browsers like Firefox from getting stuck in an infinite loop
+        // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
+        if (match.index === regex.lastIndex) {
+            regex.lastIndex++
+        }
+    }
+    return chunks;
+}
+
 const TextSection = forwardRef(function TextSection({
                                                         text,
                                                         occurrences,
@@ -24,32 +43,13 @@ const TextSection = forwardRef(function TextSection({
 
             return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
+                .map(searchWord => autoEscape ? escapeRegExpFn(searchWord) : searchWord)
                 .reduce((chunks, searchWord) => {
-                        if (autoEscape) {
-                            searchWord = escapeRegExpFn(searchWord)
-                        }
-
                         // Any word that starts with search word and ends with whitespace
                         const regex = new RegExp(`(?<=^|\\s|\\t)${searchWord}(?=\\s|\\t|$)`,
                             caseSensitive ? 'g' : 'gi');
 
-                        let match;
-                        while ((match = regex.exec(textToHighlight))) {
-                            let start = match.index
-                            let end = regex.lastIndex
-                            // We do not return zero-length matches
-                            if (end > start) {
-                                chunks.push({ start, end })
-                            }
-
-                            // Prevent browsers like Firefox from getting stuck in an infinite loop
-                            // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
-                            if (match.index === regex.lastIndex) {
-                                regex.lastIndex++
-                            }
-                        }
-
-                        return chunks
+                        return findMatches(regex, textToHighlight, chunks);
                     },
                     [] as Chunk[]);
         }
@@ -81,32 +81,13 @@ const TextSection = forwardRef(function TextSection({
 
             return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
+                .map(searchWord => autoEscape ? escapeRegExpFn(searchWord) : searchWord)
                 .reduce((chunks, searchWord) => {
-                        if (autoEscape) {
-                            searchWord = escapeRegExpFn(searchWord)
-                        }
-
                         // Any word that starts with search word and ends with whitespace
                         const regex = new RegExp(`${searchWord}`,
                             caseSensitive ? 'g' : 'gi')
 
-                        let match
-                        while ((match = regex.exec(textToHighlight))) {
-                            let start = match.index
-                            let end = regex.lastIndex
-                            // We do not return zero-length matches
-                            if (end > start) {
-                                chunks.push({ start, end })
-                            }
-
-                            // Prevent browsers like Firefox from getting stuck in an infinite loop
-                            // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
-                            if (match.index === regex.lastIndex) {
-                                regex.lastIndex++
-                            }
-                        }
-
-                        return chunks
+                        return findMatches(regex, textToHighlight, chunks);
                     },
                     [] as Chunk[])
         }
