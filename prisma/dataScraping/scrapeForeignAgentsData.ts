@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from 'cheerio';
 import * as https from "https";
-import fs from "node:fs/promises";
 
 // @ts-ignore
 import { PdfDataParser } from "pdf-data-parser";
@@ -9,6 +8,7 @@ import { PdfDataParser } from "pdf-data-parser";
 const UNDESIRED_ORGANIZATIONS_URL = "https://minjust.gov.ru/ru/documents/7756/";
 const TERRORIST_ORGANIZATIONS_URL = "http://nac.gov.ru/terroristicheskie-i-ekstremistskie-organizacii-i-materialy.html";
 const EXTREMIST_ORGANIZATIONS_URL = "https://minjust.gov.ru/ru/documents/7822/";
+const FOREIGN_AGENTS_URL = "https://minjust.gov.ru/uploaded/files/kopiya-reestr-inostrannyih-agentov-12-07-2024.pdf"
 
 async function getUndesiredOrganizations() {
     const { data } = await axios.get(UNDESIRED_ORGANIZATIONS_URL, {
@@ -52,41 +52,35 @@ async function getExtremistOrganizations() {
 }
 
 export async function getForeignAgents() {
-    const tableHeader = "Полное наименование /ФИО , прежнее ФИО"
-    const { data } = await axios.get<ArrayBuffer>("https://minjust.gov.ru/uploaded/files/kopiya-reestr-inostrannyih-agentov-12-07-2024.pdf", {
+    const { data } = await axios.get<ArrayBuffer>(FOREIGN_AGENTS_URL, {
         responseType: "arraybuffer",
         httpsAgent: new https.Agent({
             rejectUnauthorized: false
-        }),
+        })
     });
-    await fs.writeFile("./foreign-agents-list.pdf", Buffer.from(data));
-    let parser = new PdfDataParser({url: "./foreign-agents-list.pdf"});
+    let parser = new PdfDataParser({
+        data: new Uint8Array(Buffer.from(data)),
+        repeatingHeaders: true,
+        trim: true
+    });
     const rows: string[][] = await parser.parse();
-    const foreignAgents = rows
+    return rows
         .map(row => row[1])
         .filter(row => row && true)
-        .map(row => row.trim())
-        .filter(s => s != tableHeader);
-    console.log(foreignAgents);
-
-
-    // The next line crashing
-    // await fs.rm("./foreign-agents-list.pdf");
-    return foreignAgents;
+        .map(row => row.trim());
 }
 
 export async function getForeignOrganizationsData() {
     try {
-        const tableHeader = "Полное наименование /ФИО , прежнее ФИО"
         const results = await Promise.all([
             getExtremistOrganizations(),
             getTerroristOrganizations(),
             getUndesiredOrganizations(),
         ]);
-        const organizations = results.flat().filter(org => !!org).map(org => org.trim()).filter(s => s != tableHeader);
+        const organizations = results.flat().filter(org => !!org).map(org => org.trim());
         console.log("Loaded organizations: ", organizations.length);
         return organizations;
-    } catch (error) {
+    } catch ( error ) {
         console.error('Ошибка при обновлении данных:', error);
         return []
     }

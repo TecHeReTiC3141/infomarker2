@@ -11,13 +11,13 @@ interface createReportData {
     text: string;
 }
 
-function countOccurrences(mainStr: string, subStr: string) {
+function countOccurrences(full_text: string, variant: string) {
     // Escape special characters in the substring and create a regular expression
-    const escapedSubStr = subStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escapedSubStr, 'g');
+    const escapedSubStr = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedSubStr, 'gi');
 
     // Use match() with the regular expression to find all occurrences
-    const matches = mainStr.match(regex);
+    const matches = full_text.match(regex);
 
     // Return the number of matches found
     return matches?.length || 0;
@@ -26,7 +26,7 @@ function countOccurrences(mainStr: string, subStr: string) {
 async function fillAgentOccurrences(data: createReportData,
                                     id: number) {
     const foreignAgents = await prisma.foreignAgent.findMany();
-    const lowered = data.text.toLowerCase();
+    const lowered = data.text;
     for (let agent of foreignAgents) {
         let occurCount = 0;
         let findVariants: Set<string> = new Set();
