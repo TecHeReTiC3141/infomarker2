@@ -1,5 +1,9 @@
+import logging
+from typing import Callable
+
 from flask import Flask, request, jsonify
 import pymorphy2
+from pymorphy2.analyzer import Parse
 
 app = Flask(__name__)
 morph = pymorphy2.MorphAnalyzer()
@@ -24,26 +28,77 @@ def morph_org_to_case(words_to_inflect: list[str],
 
 
 # Not all parts cant be morphed (example: Дзядко, Шац, Дудь)
-def inflect_name_part(name_part: str, case: str) -> str:
-    inflected_name_part = morph.parse(name_part)[0].inflect({case})
-    return inflected_name_part.word if inflected_name_part else name_part
+def inflect_name_part(name_part_parse: Parse, case: str) -> str:
+    inflected_name_part = name_part_parse.inflect({case})
+    return inflected_name_part.word if inflected_name_part else name_part_parse.word
 
 
-def morph_name_to_case(surname: str,
-                       name: str,
-                       patronym: str,
+def get_person_gender(surname_parse: Parse,
+                      name_parse: Parse,
+                      patronym_parse: Parse) -> str:
+    get_gender: Callable[[Parse, ], str] = lambda parse: parse.tag.gender
+    gender = get_gender(surname_parse)
+    if not gender:
+        gender = get_gender(name_parse)
+    if not gender:
+        gender = get_gender(patronym_parse)
+    return gender
+
+
+def get_person_parse(surname: str,
+                     name: str,
+                     patronym: str) -> tuple[Parse, Parse, Parse]:
+    surname_parse_list: list[Parse] = list(filter(
+        lambda surname_parse: "Surn" in str(surname_parse.tag),
+        morph.parse(surname)
+    ))
+    name_parse_list: list[Parse] = list(filter(
+        lambda name_parse: "Name" in str(name_parse.tag),
+        morph.parse(name)
+    ))
+    patronym_parse_list: list[Parse] = list(filter(
+        lambda patronym_parse: "Patr" in str(patronym_parse.tag),
+        morph.parse(patronym)
+    ))
+    if not all([surname_parse_list, name_parse_list, patronym_parse_list]):
+        logging.warning(f"Person name part was not find: {surname}, {name}, {patronym}")
+        return (surname_parse_list[0] if len(surname_parse_list) else morph.parse(surname)[0],
+                name_parse_list[0] if len(name_parse_list) else morph.parse(name)[0],
+                patronym_parse_list[0] if len(patronym_parse_list) else morph.parse(patronym)[0])
+
+    person_gender = get_person_gender(surname_parse_list[0], name_parse_list[0], patronym_parse_list[0])
+    if not person_gender:
+        logging.warning(f'Person gender not found: {surname}, {name}, {patronym}')
+        return surname_parse_list[0], name_parse_list[0], patronym_parse_list[0]
+
+    filter_by_gender = lambda parse: parse.tag.gender == person_gender
+    surname_parse_list = list(filter(filter_by_gender, surname_parse_list))
+    name_parse_list = list(filter(filter_by_gender, name_parse_list))
+    patronym_parse_list = list(filter(filter_by_gender, patronym_parse_list))
+    if not all([surname_parse_list, name_parse_list, patronym_parse_list]):
+        logging.warning(f"Person name part was not find: {surname}, {name}, {patronym}")
+        return (surname_parse_list[0] if len(surname_parse_list) else morph.parse(surname)[0],
+                name_parse_list[0] if len(name_parse_list) else morph.parse(name)[0],
+                patronym_parse_list[0] if len(patronym_parse_list) else morph.parse(patronym)[0])
+
+    return surname_parse_list[0], name_parse_list[0], patronym_parse_list[0]
+
+
+def morph_name_to_case(surname_parse: Parse,
+                       name_parse: Parse,
+                       patronym_parse: Parse,
                        case: str) -> list[str]:
-    inflected_surname = inflect_name_part(surname, case)
-    inflected_name = inflect_name_part(name, case)
-    inflected_patronym = inflect_name_part(patronym, case)
+    inflected_surname = inflect_name_part(surname_parse, case)
+    inflected_name = inflect_name_part(name_parse, case)
+    inflected_patronym = inflect_name_part(patronym_parse, case)
     return [
         inflected_surname,  # Иванов
         ' '.join([inflected_surname, inflected_name, inflected_patronym]),  # Иванов Иван Иванович
         ' '.join([inflected_name, inflected_patronym, inflected_surname]),  # Иван Иванович Иванов
-        f"{inflected_surname} {name[0]}.{patronym[0]}.",  # Иванов И.И.
-        inflected_surname + " " + inflected_name,   # Иванов Иван
-        inflected_name + " " + inflected_surname,   # Иван Иванов
-        inflected_name + " " + inflected_patronym   # Иван Иванович
+        f"{inflected_surname} {name_parse.word[0]}.{patronym_parse.word[0]}.",  # Иванов И.И.
+        inflected_surname + " " + inflected_name,  # Иванов Иван
+        inflected_name + " " + inflected_surname,  # Иван Иванов
+        inflected_name + " " + inflected_patronym  # Иван Иванович
     ]
 
 
@@ -73,9 +128,10 @@ def inflect():
                 results.add(morph_org_to_case(org_words_to_inflect, org_words_not_to_inflect, case))
     elif type == "PERSON":
         surname, name, patronym = name.split()
+        surname_parse, name_parse, patronym_parse = get_person_parse(surname, name, patronym)
 
         for case in cases:
-            results.update(morph_name_to_case(surname, name, patronym, case))
+            results.update(morph_name_to_case(surname_parse, name_parse, patronym_parse, case))
     return jsonify(sorted(results, key=lambda x: len(x), reverse=True))
 
 
