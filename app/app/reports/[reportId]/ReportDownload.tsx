@@ -21,11 +21,11 @@ export const ReportDownload = forwardRef(function ReportDownload({
                                                                      agentCounts,
                                                                  }: ReportDownloadProps,
                                                                  ref: ForwardedRef<HTMLParagraphElement>) {
-    if (typeof window !== "undefined") return null;
+    if (typeof window === "undefined") return null;
     return (
         createPortal(
             <div ref={ref} className="flex gap-x-8 fixed top-0 left-[150vw] w-full">
-                <div className="max-w-[50vw] w-full h-full flex flex-col  gap-y-3 flex-[6 relative">
+                <div className="max-w-[70vw] w-full h-full flex flex-col  gap-y-3 flex-[6] relative">
                     <h3 className="text-2xl font-bold">Отчет по файлу {report.filename}</h3>
                     <TextSection text={report.text} occurrences={foundOccurrences}
                                  activeIndex={-1} activeOccurSection="found"/>

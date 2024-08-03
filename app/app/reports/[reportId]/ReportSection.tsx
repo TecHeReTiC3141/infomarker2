@@ -1,22 +1,21 @@
 "use client"
 
 import Link from "next/link";
-import { FaArrowLeftLong, FaRegCircleQuestion } from "react-icons/fa6";
+import { FaArrowLeftLong, FaDownload, FaRegCircleQuestion } from "react-icons/fa6";
 import TextSection from "@/app/app/reports/[reportId]/TextSection";
 import { GrCircleInformation } from "react-icons/gr";
 import FoundAgentInfo from "@/app/app/reports/[reportId]/components/FoundOccurInfo";
 import { OccurrenceWithAgent } from "@/app/app/reports/actions";
 import { MutableRefObject, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import SelectOccurVariant from "@/app/app/reports/[reportId]/components/SelectOccurVariant";
-import { IconType } from "react-icons";
 import { BsExclamationCircle } from "react-icons/bs";
 import PossibleOccurInfo from "@/app/app/reports/[reportId]/components/PossibleOccurInfo";
 import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
-import { FaDownload } from "react-icons/fa6";
 import html2canvas from 'html2canvas-pro';
 import jsPDF from "jspdf";
 import { Report } from "@prisma/client";
 import { ReportDownload } from "@/app/app/reports/[reportId]/ReportDownload";
+import toast from "react-hot-toast";
 
 
 interface ReportSectionProps {
@@ -30,6 +29,8 @@ export const occurVariants = {
 } as const;
 
 export default function ReportSection({ report, occurrences }: ReportSectionProps) {
+
+    // TODO: add loading spinner for creating PDF report
 
     const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -45,22 +46,38 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     const [ activeOccurSection, setActiveOccurSection ] = useState<keyof typeof occurVariants>("found");
 
+    const [ pdfReportInProgress, setPdfReportInProgress ] = useState<boolean>(false);
     console.log(activeAgentId, activeAgentIndex, agentIndexes);
 
+    // TODO: run function in a worker
     async function generatePdf() {
-        const reportElement = downloadRef.current;
+        setPdfReportInProgress(true);
 
-        const canvas = await html2canvas(reportElement!);
+        const reportElement = downloadRef.current as HTMLDivElement;
+        if (reportElement === null) {
+            toast.error("Не удалось сгенерировать PDF-отчет, попробуйте еще раз");
+        }
+        const reportFilename = `Отчет по файлу ${report.filename}.pdf`; // Replace with actual filename logic
+
+        const canvas =  await html2canvas(reportElement);
         const imgData = canvas.toDataURL('image/png');
 
-        const pdf = new jsPDF('p', 'px', 'a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const worker = new Worker(new URL('../workers/pdfWorker.ts', import.meta.url));
 
-        pdf.addImage(imgData, 'PNG', 15, 15, pdfWidth - 25, pdfHeight);
-        pdf.save(`Отчет по файлу ${report.filename}.pdf`);
-    }
+        worker.onmessage = (event) => {
+            const { pdfBlob } = event.data;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(pdfBlob);
+            link.download = reportFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setPdfReportInProgress(false);
+            worker.terminate();
+        };
+
+        worker.postMessage({ imgData });
+    };
 
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
@@ -164,7 +181,8 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     </Link>
                     <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
                     <div className="tooltip tooltip-bottom absolute right-1 top-1" data-tip="Скачать PDF">
-                        <button className=" btn btn-circle btn-ghost" onClick={generatePdf}><FaDownload size={24}/>
+                        <button className=" btn btn-circle btn-ghost" onClick={generatePdf}>
+                            {pdfReportInProgress ? <span className="loading loading-spinner text-xl" /> : <FaDownload size={24}/> }
                         </button>
                     </div>
                     <TextSection text={report.text} occurrences={filteredOccurrences}
@@ -181,7 +199,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             юридического документа</p>
                     </div>
                     <div className="w-full flex justify-between items-center">
-
                         <h4 className="text-xl font-bold">{activeOccurSection === "found" ? "Обнаруженные" : "Возможные"} упоминания</h4>
                         <SelectOccurVariant active={activeOccurSection} setActive={setActiveOccurSection}/>
                     </div>
