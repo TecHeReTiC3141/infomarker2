@@ -20,15 +20,9 @@ const TextSection = forwardRef(function TextSection({
 
         const allSearchWords: string[] = occurrences?.flatMap(item => item.foundVariants) || [];
 
-        const findChunksExplicit = ({
-                                        autoEscape,
-                                        caseSensitive,
-                                        searchWords,
-                                        textToHighlight
-                                    }: FindChunks): Array<Chunk> => {
+        function findChunksExplicit({ autoEscape, caseSensitive, searchWords, textToHighlight }: FindChunks): Array<Chunk> {
 
-
-            return searchWords
+            return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
                 .reduce((chunks, searchWord) => {
                         if (autoEscape) {
@@ -37,9 +31,9 @@ const TextSection = forwardRef(function TextSection({
 
                         // Any word that starts with search word and ends with whitespace
                         const regex = new RegExp(`(?<=^|\\s|\\t)${searchWord}(?=\\s|\\t|$)`,
-                            caseSensitive ? 'g' : 'gi')
+                            caseSensitive ? 'g' : 'gi');
 
-                        let match
+                        let match;
                         while ((match = regex.exec(textToHighlight))) {
                             let start = match.index
                             let end = regex.lastIndex
@@ -57,8 +51,9 @@ const TextSection = forwardRef(function TextSection({
 
                         return chunks
                     },
-                    [] as Chunk[])
+                    [] as Chunk[]);
         }
+
         console.log(allSearchWords);
         // Кастомная функция для поиска целых слов
         const findChunks = ({ textToHighlight }: FindChunks) => {
@@ -84,7 +79,7 @@ const TextSection = forwardRef(function TextSection({
                                    }: FindChunks): Array<Chunk> => {
 
 
-            return searchWords
+            return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
                 .reduce((chunks, searchWord) => {
                         if (autoEscape) {
@@ -132,7 +127,7 @@ const TextSection = forwardRef(function TextSection({
     }
 )
 
-function escapeRegExpFn(string: string | RegExp): string | RegExp {
+function escapeRegExpFn(string: string): string {
     if (typeof string !== "string")
         return string
     return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')

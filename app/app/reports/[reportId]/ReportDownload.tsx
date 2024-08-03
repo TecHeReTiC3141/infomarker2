@@ -21,7 +21,7 @@ export const ReportDownload = forwardRef(function ReportDownload({
                                                                      agentCounts,
                                                                  }: ReportDownloadProps,
                                                                  ref: ForwardedRef<HTMLParagraphElement>) {
-    if (!window) return null;
+    if (typeof window !== "undefined") return null;
     return (
         createPortal(
             <div ref={ref} className="flex gap-x-8 fixed top-0 left-[150vw] w-full">

@@ -57,9 +57,13 @@ export async function updateAgents() {
     console.log("Persons have been created");
     const reports = await prisma.report.findMany();
     console.log("Recreating agent occurrences in all reports...");
-    await Promise.all(
-        reports.map(async report => recreateAgentOccurrences(report.id))
-    );
+    const reportsBar = new SingleBar({ stopOnComplete: true }, Presets.shades_classic);
+    reportsBar.start(reports.length, 0);
+    // TODO: run in parallel by 10 s
+    for (let report of reports) {
+        await recreateAgentOccurrences(report.id);
+        reportsBar.increment();
+    }
     console.log("Seeding completed");
 }
 
