@@ -169,7 +169,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     </div>
                     <TextSection text={report.text} occurrences={filteredOccurrences}
                                  ref={sectionRef}
-                                 activeOccurSection={activeOccurSection}
+                                 activeOccurSection={activeOccurSection.toString()}
                                  activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
                 </div>
                 <div className="flex-[2] min-w-72 flex flex-col gap-y-3">
