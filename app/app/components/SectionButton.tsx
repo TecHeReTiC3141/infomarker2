@@ -11,6 +11,8 @@ export interface SectionButtonProps {
 
 export default function SectionButton({ text, section }: SectionButtonProps) {
     const pathname = usePathname();
+    // TODO: add spinner when clicked before redirecting
+    // TODO: add text that app can be slow during first redirect to page
 
     const isActive = pathname.includes(section);
 
