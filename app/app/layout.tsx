@@ -16,10 +16,12 @@ const sections: SectionButtonProps[] = [
     {
         text: "Профиль",
         section: "profile",
+        disabled: true,
     },
     {
         text: "Настройки",
         section: "settings",
+        disabled: true,
     },
 ]
 

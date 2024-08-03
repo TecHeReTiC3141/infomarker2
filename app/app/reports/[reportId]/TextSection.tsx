@@ -123,7 +123,7 @@ const TextSection = forwardRef(function TextSection({
                     <Highlighter searchWords={Array.of(...allSearchWords)} highlightStyle={{ background: "red" }}
                                  findChunks={activeOccurSection == "found" ? findChunksExplicit : findChunksDefault}
                         // If the search will be case intensive then uncomment next line
-                                 caseSensitive={activeOccurSection == "found"}
+                        //          caseSensitive={activeOccurSection == "found"}
                                  activeIndex={activeIndex} activeClassName="active"
                                  textToHighlight={text.replace(/\n{2,}/g, '\n').trim()}/>
                 </p>
