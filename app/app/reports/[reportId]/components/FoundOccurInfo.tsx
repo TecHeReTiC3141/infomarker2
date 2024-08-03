@@ -23,7 +23,7 @@ export default function FoundOccurInfo({
 
     return (
         <div
-            className={clsx(isActive && "ring-2 ring-blue-400", "flex w-full items-center rounded-md px-2 py-4 group cursor-pointer")}
+            className={clsx(isActive && "ring-2 ring-blue-400 active-agent", "flex w-full items-center rounded-md px-2 py-4 group cursor-pointer")}
             style={{ backgroundColor: occurrence.color, color: getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black" }}
             onClick={() => {
                 setActiveAgentId(occurrence.foreignAgentId);
