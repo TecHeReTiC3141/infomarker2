@@ -12,7 +12,7 @@ export default function ReportCard({ report }: ReportCardProps) {
             <div className="w-48 h-48 bg-base-100 flex items-center justify-center rounded-lg">
                 <FileIcon filename={report.filename}/>
             </div>
-            <h5 className="font-bold text-lg mt-2 break-all max-w-48">{report.filename}</h5>
+            <h5 className="font-bold mt-2 break-all max-w-48">{report.filename}</h5>
         </Link>
     )
 }

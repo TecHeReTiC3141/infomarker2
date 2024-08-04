@@ -30,7 +30,8 @@ def morph_org_to_case(words_to_inflect: list[str],
 # Not all parts cant be morphed (example: Дзядко, Шац, Дудь)
 def inflect_name_part(name_part_parse: Parse, case: str) -> str:
     inflected_name_part = name_part_parse.inflect({case})
-    return inflected_name_part.word if inflected_name_part else name_part_parse.word
+    result = inflected_name_part.word if inflected_name_part else name_part
+    return result.capitalize()
 
 
 def get_person_gender(surname_parse: Parse,
@@ -118,6 +119,7 @@ def inflect():
         has_org_name = '"' in name
         if has_org_name:
             org_name = name.split('"')[1].replace('"', '')
+            results.add(org_name)   # один результат с правильной капитализацией букв
             first_noun = find_first_noun_index(org_name.split())
             org_words_to_inflect = org_name.split()[:first_noun + 1]
             org_words_not_to_inflect = org_name.split()[first_noun + 1:]

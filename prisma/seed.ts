@@ -9,6 +9,8 @@ async function main() {
 }
 
 export async function updateAgents() {
+
+    // TODO: turn it into transaction
     let [ organizations, agents ] = await Promise.all([
         getForeignOrganizationsData(),
         getForeignAgents()
@@ -41,9 +43,9 @@ export async function updateAgents() {
         organizationsBar.increment();
     }
     console.log("Organizations have been created");
+    console.log("Creating persons...");
     const personsBar = new SingleBar({ stopOnComplete: true }, Presets.shades_classic);
     personsBar.start(agents.length, 0);
-    console.log("Creating persons...");
     for (let person of agents) {
         await createForeignAgent({
             name: person,
@@ -51,7 +53,7 @@ export async function updateAgents() {
         });
         personsBar.increment();
     }
-    personsBar.stop()
+    personsBar.stop();
     console.log("Persons have been created");
     const reports = await prisma.report.findMany();
     console.log("Recreating agent occurrences in all reports...");

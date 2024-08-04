@@ -25,10 +25,10 @@ export const ReportDownload = forwardRef(function ReportDownload({
     return (
         createPortal(
             <div ref={ref} className="flex gap-x-8 fixed top-0 left-[150vw] w-full">
-                <div className="max-w-[55vw] w-full h-full flex flex-col  gap-y-3 flex-[6 relative">
+                <div className="max-w-[50vw] w-full h-full flex flex-col  gap-y-3 flex-[6 relative">
                     <h3 className="text-2xl font-bold">Отчет по файлу {report.filename}</h3>
                     <TextSection text={report.text} occurrences={foundOccurrences}
-                                 activeIndex={-1}/>
+                                 activeIndex={-1} activeOccurSection="found"/>
                 </div>
                 <div className="flex-[2] min-w-72 flex flex-col gap-y-3">
                     <div className="w-full rounded-xl bg-info/40 text-blue-600 flex gap-x-3 items-center p-3">

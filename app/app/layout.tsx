@@ -16,16 +16,18 @@ const sections: SectionButtonProps[] = [
     {
         text: "Профиль",
         section: "profile",
+        disabled: true,
     },
     {
         text: "Настройки",
         section: "settings",
+        disabled: true,
     },
 ]
 
 export default function AppLayout({children}: ProfileLayoutProps) {
     return (
-        <div className="container mx-auto flex justify-between gap-x-12 h-full">
+        <div className="container mx-auto flex justify-between gap-x-8 h-full">
             <div className="flex flex-col gap-y-4">
                 {
                     sections.map(section => (
