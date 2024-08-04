@@ -30,7 +30,7 @@ def morph_org_to_case(words_to_inflect: list[str],
 # Not all parts cant be morphed (example: Дзядко, Шац, Дудь)
 def inflect_name_part(name_part_parse: Parse, case: str) -> str:
     inflected_name_part = name_part_parse.inflect({case})
-    result = inflected_name_part.word if inflected_name_part else name_part
+    result = inflected_name_part.word if inflected_name_part else name_part_parse.word
     return result.capitalize()
 
 
@@ -96,7 +96,7 @@ def morph_name_to_case(surname_parse: Parse,
         inflected_surname,  # Иванов
         ' '.join([inflected_surname, inflected_name, inflected_patronym]),  # Иванов Иван Иванович
         ' '.join([inflected_name, inflected_patronym, inflected_surname]),  # Иван Иванович Иванов
-        f"{inflected_surname} {name_parse.word[0]}.{patronym_parse.word[0]}.",  # Иванов И.И.
+        f"{inflected_surname} {name_parse.word[0].capitalize()}.{patronym_parse.word[0].capitalize()}.",  # Иванов И.И.
         inflected_surname + " " + inflected_name,  # Иванов Иван
         inflected_name + " " + inflected_surname,  # Иван Иванов
         inflected_name + " " + inflected_patronym  # Иван Иванович
