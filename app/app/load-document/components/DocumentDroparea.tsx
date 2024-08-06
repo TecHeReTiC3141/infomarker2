@@ -71,7 +71,7 @@ export default function DocumentDroparea() {
             setError((err as Error).message);
         }
     }
-
+    // TODO: try to deal with 504 error
     async function handleUpload() {
         if (!file) return;
         setIsLoading(true);

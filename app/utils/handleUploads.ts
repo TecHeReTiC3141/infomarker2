@@ -76,6 +76,6 @@ export async function extractTextFromFile(file: File) {
     const handler = fileHandlers[ extension as keyof FileExtensionHandlers ];
 
     const text = await handler(file);
-
+    console.log("in extract text", text);
     return await createReport({ filename: file.name, text });
 }

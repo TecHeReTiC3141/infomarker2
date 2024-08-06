@@ -17,7 +17,6 @@ type Variant = "LOGIN" | "REGISTER";
 
 export default function AuthForm() {
 
-    // TODO: show loader while using 0auth instead of error
 
     const [ variant, setVariant ] = useState<Variant>("LOGIN");
 

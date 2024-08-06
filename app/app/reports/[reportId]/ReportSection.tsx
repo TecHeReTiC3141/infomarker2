@@ -30,7 +30,8 @@ export const occurVariants = {
 
 export default function ReportSection({ report, occurrences }: ReportSectionProps) {
 
-    // TODO: add loading spinner for creating PDF report
+    // TODO: выводить в FoundAgentInfo и PossibleOccurInfo людей, потом организаций
+
 
     const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +50,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     const [ pdfReportInProgress, setPdfReportInProgress ] = useState<boolean>(false);
     console.log(activeAgentId, activeAgentIndex, agentIndexes);
 
-    // TODO: run function in a worker
+    // TODO: run function in a worker (didn't work)
     async function generatePdf() {
         setPdfReportInProgress(true);
 
@@ -59,25 +60,28 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
         }
         const reportFilename = `Отчет по файлу ${report.filename}.pdf`; // Replace with actual filename logic
 
-        const canvas =  await html2canvas(reportElement);
-        const imgData = canvas.toDataURL('image/png');
+        requestIdleCallback(async () => {
+            const canvas = await html2canvas(reportElement);
+            const imgData = canvas.toDataURL('image/png');
 
-        const worker = new Worker(new URL('../workers/pdfWorker.ts', import.meta.url));
+            const worker = new Worker(new URL('../workers/pdfWorker.ts', import.meta.url));
 
-        worker.onmessage = (event) => {
-            const { pdfBlob } = event.data;
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(pdfBlob);
-            link.download = reportFilename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setPdfReportInProgress(false);
-            worker.terminate();
-        };
+            worker.onmessage = (event) => {
+                const { pdfBlob } = event.data;
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(pdfBlob);
+                link.download = reportFilename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
-        worker.postMessage({ imgData });
-    };
+                setPdfReportInProgress(false);
+                worker.terminate();
+            };
+
+            worker.postMessage({ imgData, reportFilename });
+        });
+    }
 
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
@@ -90,7 +94,8 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                 for (let occurrence of (occurrences || [])) {
                     const { foreignAgent, foundVariants } = occurrence;
                     const lengthSortReversed = (a: string, b: string) => (a.length > b.length ? -1 : 1)
-                    for (let variant of foundVariants.sort(lengthSortReversed)) {
+                    const sortedVariants = foundVariants.toSorted(lengthSortReversed);
+                    for (let variant of sortedVariants) {
                         if (mark.textContent === variant) {
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;

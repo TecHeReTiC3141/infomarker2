@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { LinkWithToastAndLoading } from "@/app/components/LinkWithToastAndLoading";
 
 export interface SectionButtonProps {
     text: string,
@@ -18,16 +19,6 @@ export default function SectionButton({ text, section, disabled = false }: Secti
 
     const isActive = pathname.includes(section);
 
-    const [ loadingTimeout, setLoadingTimeout ] = useState<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        setLoading(false);
-        if (loadingTimeout) {
-            clearTimeout(loadingTimeout);
-        }
-    }, [ pathname ]);
-
-    const [ loading, setLoading ] = useState<boolean>(false);
     return (
         <>
             {
@@ -35,18 +26,12 @@ export default function SectionButton({ text, section, disabled = false }: Secti
                     <button disabled
                             className={"btn btn-primary btn-lg w-40 lg:w-48 xl:w-56 justify-start"}>{text}</button>
                     :
-                    <Link href={`/app/${section}`} onClick={() => {
-                        setLoading(true);
-                        setLoadingTimeout(setTimeout(
-                            () => toast.loading("Возможна задержка при первом переходе на страницу, но при последующих ее не будет наблюдаться",
-                                { duration: 3000 },
-                            ), 1000));
-                    }}
+                    <LinkWithToastAndLoading href={`/app/${section}`}
                           className={clsx("btn btn-lg w-40 lg:w-48 xl:w-56 justify-between items-center",
                               isActive ? "btn-primary" : "btn-neutral")}>
                         {text}
-                        {loading && <span className="loading loading-spinner text-sm"></span>}
-                    </Link>
+                        <span className="hidden group-[.loading-link]:inline loading loading-spinner text-sm" />
+                    </LinkWithToastAndLoading>
             }
         </>
     )
