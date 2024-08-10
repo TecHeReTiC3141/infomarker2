@@ -38,11 +38,11 @@ def get_person_gender(surname_parse: Parse,
                       name_parse: Parse,
                       patronym_parse: Parse) -> str:
     get_gender: Callable[[Parse, ], str] = lambda parse: parse.tag.gender
-    gender = get_gender(surname_parse)
-    if not gender:
-        gender = get_gender(name_parse)
+    gender = get_gender(name_parse)
     if not gender:
         gender = get_gender(patronym_parse)
+    if not gender:
+        gender = get_gender(surname_parse)
     return gender
 
 
