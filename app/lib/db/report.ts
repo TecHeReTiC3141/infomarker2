@@ -77,7 +77,7 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
-    await fillAgentOccurrences(data, id);
+    fillAgentOccurrences(data, id);
     return id;
 }
 

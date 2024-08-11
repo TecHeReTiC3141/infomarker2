@@ -67,7 +67,7 @@ export async function updateAgents() {
     console.log("Seeding completed");
 }
 
-// main().then(() => prisma.$disconnect()).catch(err => {
-//     console.log(err);
-//     prisma.$disconnect();
-// })
+main().then(() => prisma.$disconnect()).catch(err => {
+    console.log(err);
+    prisma.$disconnect();
+})
