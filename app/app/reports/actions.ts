@@ -10,6 +10,11 @@ export async function getReportOccurrences(reportId: number): Promise<Occurrence
         },
         include: {
             foreignAgent: true,
+        },
+        orderBy: {
+            foreignAgent: {
+                type: "asc",
+            }
         }
     });
 }

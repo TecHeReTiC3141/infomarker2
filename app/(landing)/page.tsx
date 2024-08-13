@@ -7,11 +7,6 @@ export default async function LandingPage() {
 
     // TODO: create landing page
 
-    const session = await getServerSession(authOptions);
-    //
-    // if (session) {
-    //     throw redirect("/app/load-document");
-    // }
     return (
         <div className="container flex flex-col w-full gap-y-10 items-center">
             <div

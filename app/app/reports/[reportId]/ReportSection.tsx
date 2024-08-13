@@ -12,7 +12,6 @@ import { BsExclamationCircle } from "react-icons/bs";
 import PossibleOccurInfo from "@/app/app/reports/[reportId]/components/PossibleOccurInfo";
 import { BRIGHTNESS_THRESHOLD, getColorBrightness } from "@/app/utils/occuranceColors";
 import html2canvas from 'html2canvas-pro';
-import jsPDF from "jspdf";
 import { Report } from "@prisma/client";
 import { ReportDownload } from "@/app/app/reports/[reportId]/ReportDownload";
 import toast from "react-hot-toast";
@@ -30,12 +29,9 @@ export const occurVariants = {
 
 export default function ReportSection({ report, occurrences }: ReportSectionProps) {
 
-    // TODO: выводить в FoundAgentInfo и PossibleOccurInfo людей, потом организаций
-
-
     const downloadRef = useRef<HTMLDivElement>(null);
 
-    const sectionRef = useRef<HTMLParagraphElement>(null);
+    const textSectionRef = useRef<HTMLParagraphElement>(null);
 
     const [ agentOccurCounts, setAgentOccurCounts ] = useState<Record<string, number>>({});
 
@@ -85,7 +81,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
-        const marks = sectionRef.current?.querySelectorAll("mark") || [];
+        const marks = textSectionRef.current?.querySelectorAll("mark") || [];
         setAgentOccurCounts({});
         agentIndexes.current = {};
         for (let i = 0; i < marks.length; ++i) {
@@ -108,7 +104,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     }
                 }
         }
-    }, [ occurrences ]);
+    }, [ activeOccurSection, occurrences ]);
 
     const filteredOccurrences = useMemo(() => {
         const filtered = activeOccurSection === "found" ?
@@ -125,23 +121,24 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             occurrences?.filter(occurrence => !agentOccurCounts[ occurrence.foreignAgent.id ]),
         [ agentOccurCounts, occurrences ]);
 
-    function setMarkStyles(ref: RefObject<HTMLDivElement>, occurrences: OccurrenceWithAgent[] | undefined) {
+    function setMarkStyles(ref: RefObject<HTMLDivElement>, occurrences: OccurrenceWithAgent[] | undefined, interactive: boolean) {
         const marks = ref.current?.querySelectorAll("mark") || [];
         for (let i = 0; i < marks.length; ++i) {
             const mark = marks[ i ];
             occurLoop:
                 for (let occurrence of (occurrences || [])) {
-                    const { foreignAgent, foundVariants } = occurrence;
+                    const { foundVariants } = occurrence;
                     for (let variant of foundVariants) {
                         if (mark.textContent === variant) {
                             mark.style.background = occurrence.color;
                             mark.style.color = getColorBrightness(occurrence.color) < BRIGHTNESS_THRESHOLD ? "white" : "black";
-                            // Fix error with active when mark is clicked
-                            mark.addEventListener("click", () => {
-                                console.log(mark.dataset.agentId, mark.dataset.index, Number(mark.dataset.index) ?? -1);
-                                setActiveAgentId(Number(mark.dataset.agentId));
-                                setActiveAgentIndex(Number(mark.dataset.index) ?? -1);
-                            });
+                            if (interactive) {
+                                mark.addEventListener("click", () => {
+                                    console.log(mark.dataset.agentId, mark.dataset.index, Number(mark.dataset.index) ?? -1);
+                                    setActiveAgentId(Number(mark.dataset.agentId));
+                                    setActiveAgentIndex(Number(mark.dataset.index) ?? -1);
+                                });
+                            }
                             break occurLoop;
                         }
                     }
@@ -152,13 +149,13 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     // effect for styles and interactivity of marks in text section
     useEffect(() => {
-        setMarkStyles(sectionRef, filteredOccurrences);
-        setMarkStyles(downloadRef, foundOccurrences);
+        setMarkStyles(textSectionRef, filteredOccurrences, true);
+        setMarkStyles(downloadRef, foundOccurrences, false);
     }, [ filteredOccurrences, foundOccurrences ]);
 
 
     useEffect(() => {
-        const marks = (sectionRef as MutableRefObject<HTMLParagraphElement>).current?.querySelectorAll("mark") || [];
+        const marks = (textSectionRef as MutableRefObject<HTMLParagraphElement>).current?.querySelectorAll("mark") || [];
         for (let mark of marks) {
             if (mark.dataset.agentId === activeAgentId.toString()) {
                 mark.classList.add("highlighted");
@@ -187,11 +184,12 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
                     <div className="tooltip tooltip-bottom absolute right-1 top-1" data-tip="Скачать PDF">
                         <button className=" btn btn-circle btn-ghost" onClick={generatePdf}>
-                            {pdfReportInProgress ? <span className="loading loading-spinner text-xl" /> : <FaDownload size={24}/> }
+                            {pdfReportInProgress ? <span className="loading loading-spinner text-xl"/> :
+                                <FaDownload size={24}/>}
                         </button>
                     </div>
                     <TextSection text={report.text} occurrences={filteredOccurrences}
-                                 ref={sectionRef}
+                                 ref={textSectionRef}
                                  activeOccurSection={activeOccurSection}
                                  activeIndex={agentIndexes.current?.[ activeAgentId ]?.[ activeAgentIndex ] || -1}/>
                 </div>
