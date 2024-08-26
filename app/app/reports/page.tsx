@@ -6,6 +6,8 @@ import ReportCard from "@/app/app/reports/components/ReportCard";
 
 export default async function ReportsPage() {
 
+    // TODO: implement editing (renaming) and deleting of reports in separate modal
+
     const session = await getServerSession(authOptions) as Session;
 
     const user = session.user;

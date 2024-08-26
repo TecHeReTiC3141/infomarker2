@@ -82,7 +82,6 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
         const marks = textSectionRef.current?.querySelectorAll("mark") || [];
-        setAgentOccurCounts({});
         agentIndexes.current = {};
         for (let i = 0; i < marks.length; ++i) {
             const mark = marks[ i ];
@@ -97,13 +96,18 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
                             mark.dataset.index = curIndex.toString();
                             mark.dataset.agentId = occurrence.foreignAgentId.toString();
-                            setAgentOccurCounts(prev =>
-                                ({ ...prev, [ foreignAgent.id ]: (prev[ foreignAgent.id ] || 0) + 1 }));
+                            console.log(mark.textContent, mark.dataset.index, mark.dataset.agentId);
                             break occurLoop;
                         }
                     }
                 }
         }
+        console.log("agentIndexes", agentIndexes);
+        console.log("agentOccurCounts", agentOccurCounts);
+        const counts = Object.entries(agentIndexes.current).map(([ key, value ]) => [ key, value.length ]);
+        setAgentOccurCounts(Object.fromEntries(counts))
+        setMarkStyles(textSectionRef, filteredOccurrences, true);
+        setMarkStyles(downloadRef, foundOccurrences, false);
     }, [ activeOccurSection, occurrences ]);
 
     const filteredOccurrences = useMemo(() => {
@@ -211,19 +215,19 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                             <h4 className="pb-2 border-b-2 border-base-300 flex-1">иноагенты и организации</h4>
                             <h4 className="pb-2 border-b-2 border-base-300">количество</h4>
                         </div>
-                        {activeOccurSection === "found" ?
+                        {
                             filteredOccurrences?.map((occurrence) => (
-                                <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
-                                                isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                activeAgentIndex={activeAgentIndex}
-                                                counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                setActiveAgentIndex={setActiveAgentIndex}/>
-                            )) :
-                            filteredOccurrences?.map((occurrence) => (
-                                <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
-                                                   isActive={occurrence.foreignAgent.id === activeAgentId}
-                                                   counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
-                                                   setActiveAgentIndex={setActiveAgentIndex}/>
+                                activeOccurSection === "found" ?
+                                    <FoundAgentInfo key={occurrence.id} occurrence={occurrence}
+                                                    isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                    activeAgentIndex={activeAgentIndex}
+                                                    counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                    setActiveAgentIndex={setActiveAgentIndex}/>
+                                    :
+                                    <PossibleOccurInfo key={occurrence.id} occurrence={occurrence}
+                                                       isActive={occurrence.foreignAgent.id === activeAgentId}
+                                                       counts={agentOccurCounts} setActiveAgentId={setActiveAgentId}
+                                                       setActiveAgentIndex={setActiveAgentIndex}/>
                             ))
                         }
                     </div>

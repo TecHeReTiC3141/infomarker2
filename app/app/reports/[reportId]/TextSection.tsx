@@ -54,8 +54,6 @@ const TextSection = forwardRef(function TextSection({
                     [] as Chunk[]);
         }
 
-        console.log(allSearchWords);
-        // Кастомная функция для поиска целых слов
         const findChunks = ({ textToHighlight }: FindChunks) => {
             const chunks = [];
             const regex = new RegExp(`(?<=[\\^\\s!,.-])${allSearchWords.join('|')}(?=[$\\s!?,.-])`, 'gi');
@@ -98,8 +96,7 @@ const TextSection = forwardRef(function TextSection({
                 <p ref={ref} id="report-text" className="w-full mb-3 text-wrap whitespace-pre-line break-words">
                     <Highlighter searchWords={Array.of(...allSearchWords)} highlightStyle={{ background: "red" }}
                                  findChunks={activeOccurSection == "found" ? findChunksExplicit : findChunksDefault}
-                        // If the search will be case intensive then uncomment next line
-                        //          caseSensitive={activeOccurSection == "found"}
+                                 caseSensitive={activeOccurSection == "found"}
                                  activeIndex={activeIndex} activeClassName="active"
                                  textToHighlight={text.replace(/\n{2,}/g, '\n').trim()}/>
                 </p>
