@@ -86,11 +86,13 @@ model VerificationRequest {
 model Report {
     id             Int              @id @default(autoincrement())
     filename       String
+    name           String?
     text           String
     userId         Int
     createdAt      DateTime         @default(now())
     updatedAt      DateTime         @updatedAt
     user           User             @relation(fields: [userId], references: [id])
+    order          Int?             @default(0)
     AgentOccurance AgentOccurance[]
 
     @@map("reports")

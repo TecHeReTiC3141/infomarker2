@@ -1,10 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import toast from "react-hot-toast";
-import { useEffect, useState } from "react";
 import { LinkWithToastAndLoading } from "@/app/components/LinkWithToastAndLoading";
 
 export interface SectionButtonProps {
