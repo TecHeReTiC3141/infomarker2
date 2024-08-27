@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Report } from "@prisma/client";
 import { MdEdit } from "react-icons/md";
 import { useSelectedReport } from "@/app/app/reports/contexts/SelectedReportContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface ReportCardProps {
     report: Report,
@@ -12,7 +13,9 @@ interface ReportCardProps {
 
 export default function ReportCard({ report }: ReportCardProps) {
 
-    const {setSelectedReportId} = useSelectedReport();
+    const searchParams= useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter();
 
     return (
         <Link href={`/app/reports/${report.id}`}
@@ -25,9 +28,10 @@ export default function ReportCard({ report }: ReportCardProps) {
                 className="btn btn-xs btn-circle hidden group-hover:flex absolute -top-2 -right-2 items-center justify-center cursor-pointer"
                 onClick={event => {
                     event.preventDefault();
-                    setSelectedReportId(report.id);
-                    const modal = document.getElementById("selected-report-modal") as HTMLDialogElement;
-                    modal.showModal();
+                    const newSearchParams = new URLSearchParams(searchParams.toString());
+                    newSearchParams.set("selectedReportId", report.id.toString());
+                    router.push(pathname + '?' + newSearchParams.toString());
+
                 }}>
                 <MdEdit size={14}/>
             </button>
