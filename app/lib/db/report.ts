@@ -78,6 +78,7 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
+    revalidatePath("/app/reports");
     fillAgentOccurrences(data, id);
     return id;
 }
@@ -101,6 +102,9 @@ export async function getUserReports(userId: number): Promise<Report[]> {
     return prisma.report.findMany({
         where: {
             userId,
+        },
+        orderBy: {
+            order: "asc",
         }
     });
 }

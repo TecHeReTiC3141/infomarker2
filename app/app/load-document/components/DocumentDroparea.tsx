@@ -81,12 +81,11 @@ export default function DocumentDroparea() {
             const newReportId = await extractTextFromFile(file);
             toast.loading("Файл успешно загружен, теперь мы ищем иноагентов в тексте", { duration: 15000 });
             setTimeout(() => {
+                setIsLoading(false);
                 router.push(`/app/reports/${newReportId}`);
             }, 15000);
         } catch (err) {
             setError((err as Error).message);
-        } finally {
-            setIsLoading(false);
         }
     }
 

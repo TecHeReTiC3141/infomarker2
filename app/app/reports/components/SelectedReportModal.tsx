@@ -35,7 +35,7 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
             return `${(length / 1024).toFixed(2)} KB`;
         }
         return `${(length / 1024 / 1024).toFixed(2)} MB`;
-    }, [ selectedReport?.text ]);
+    }, [selectedReport]);
 
     const anythingUpdated = useMemo(() => {
         return reportName !== initialName
@@ -113,7 +113,7 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
                         {/*</label>*/}
                         <label className="w-full flex items-center justify-between gap-x-2">
                             <span className="label-text text-sm">Размер</span>
-                            <input type="text" defaultValue={reportSize} disabled
+                            <input type="text" value={reportSize} disabled
                                    className="border-b-2 border-gray-400 focus:border-gray-800 focus:border-0 focus-visible:border-0
                                    focus:border-b-2 focus-visible:border-b-2 max-w-[280px] w-full indent-2 "/>
                         </label>
