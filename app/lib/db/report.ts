@@ -5,6 +5,7 @@ import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
 import { Report } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import { revalidatePath } from "next/cache";
 
 interface createReportData {
     filename: string;
@@ -115,5 +116,22 @@ export async function recreateAgentOccurrences(reportId: number) {
         return;
     }
     await fillAgentOccurrences(report, reportId);
+}
 
+export async function deleteReportById(reportId: number) {
+    return prisma.report.delete({
+        where: {
+            id: reportId,
+        }
+    });
+}
+
+export async function updateReportById(reportId: number, updateData: Partial<Report>) {
+    await prisma.report.update({
+        where: {
+            id: reportId,
+        },
+        data: updateData,
+    });
+    revalidatePath("/app/reports");
 }

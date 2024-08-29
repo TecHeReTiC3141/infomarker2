@@ -23,7 +23,7 @@ export default function ReportCard({ report }: ReportCardProps) {
             <div className="w-48 h-48 bg-base-100 flex items-center justify-center rounded-lg">
                 <FileIcon filename={report.filename}/>
             </div>
-            <h5 className="font-bold mt-2 break-all max-w-48">{report.filename}</h5>
+            <h5 className="font-bold mt-2 break-all max-w-48">{report.name || report.filename}</h5>
             <button
                 className="btn btn-xs btn-circle hidden group-hover:flex absolute -top-2 -right-2 items-center justify-center cursor-pointer"
                 onClick={event => {
@@ -31,7 +31,6 @@ export default function ReportCard({ report }: ReportCardProps) {
                     const newSearchParams = new URLSearchParams(searchParams.toString());
                     newSearchParams.set("selectedReportId", report.id.toString());
                     router.push(pathname + '?' + newSearchParams.toString());
-
                 }}>
                 <MdEdit size={14}/>
             </button>
