@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Report } from "@prisma/client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import FileIcon from "@/app/app/load-document/components/FileIcon";
-import { FaXmark } from "react-icons/fa6";
-import { FaTrashCan } from "react-icons/fa6";
+import { FaTrashCan, FaXmark } from "react-icons/fa6";
 import { deleteReportById, updateReportById } from "@/app/lib/db/report";
 import toast from "react-hot-toast";
+import clsx from "clsx";
+import { MdOutlineCheck } from "react-icons/md";
 
 interface SelectedReportModal {
     selectedReport: Report | undefined,
@@ -21,6 +22,8 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
 
     const [ updateLoading, setUpdateLoading ] = useState<boolean>(false);
     const [ deleteLoading, setDeleteLoading ] = useState<boolean>(false);
+
+    const [ isDeleteOpened, setIsDeleteOpened ] = useState<boolean>(false);
 
     const initialName = useMemo(() => selectedReport?.name ?? selectedReport?.filename ?? "", [ selectedReport ]);
 
@@ -43,6 +46,7 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
 
     async function handleDelete() {
         try {
+            setIsDeleteOpened(false);
             setDeleteLoading(true);
             await deleteReportById(selectedReport?.id as number);
             handleClose();
@@ -57,6 +61,7 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
     async function handleSave() {
         const updateData = { name: reportName };
         try {
+            setIsDeleteOpened(false);
             setUpdateLoading(true);
             await updateReportById(selectedReport?.id as number, updateData);
             handleClose();
@@ -106,11 +111,6 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
                                    className="border-b-2 border-gray-400 focus:outline-none focus-visible:outline-none
                                    max-w-[280px] w-full indent-2"/>
                         </label>
-                        {/*<label className="w-full flex items-center justify-between gap-x-2">*/}
-                        {/*    <span className="label-text text-sm">Файл</span>*/}
-                        {/*    <input type="text" placeholder="Type here"*/}
-                        {/*           className="input input-sm input-bordered max-w-[280px] w-full"/>*/}
-                        {/*</label>*/}
                         <label className="w-full flex items-center justify-between gap-x-2">
                             <span className="label-text text-sm">Размер</span>
                             <input type="text" value={reportSize} disabled
@@ -120,8 +120,13 @@ export default function SelectedReportModal({ selectedReport }: SelectedReportMo
                     </div>
                 </div>
                 <div className="modal-action w-full  gap-x-3">
-                    <button className="btn  btn-sm btn-error" onClick={handleDelete}>{deleteLoading ?
-                        <span className="loading loading-spinner"/> : <FaTrashCan/>}</button>
+                    <button className="btn  btn-sm btn-error" onClick={() => setIsDeleteOpened(prev => !prev)}>{deleteLoading ?
+                        <span className="loading loading-spinner"/> : <FaTrashCan size={18}/>}</button>
+                    <div className={clsx("flex items-center gap-x-3 overflow-x-hidden transition-all duration-300", isDeleteOpened ? "w-[300px]" : "w-0")}>
+                        <p className="text-sm">Уверены?</p>
+                        <button className="btn btn-sm btn-success" onClick={handleDelete}><MdOutlineCheck size={18} /></button>
+                        <button className="btn btn-sm btn-error" onClick={() => setIsDeleteOpened(false)}><FaXmark size={18} /></button>
+                    </div>
                     <div className="flex-1"/>
                     <button className="btn  btn-sm btn-warning" onClick={handleSave} disabled={!anythingUpdated}>
                         {updateLoading ? <span className="loading loading-spinner"/> : "Save"}
