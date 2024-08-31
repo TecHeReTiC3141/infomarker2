@@ -1,5 +1,8 @@
-import { AgentOccurance, ForeignAgent } from "@prisma/client";
+"use server"
+
+import { AgentOccurance, ForeignAgent, Report } from "@prisma/client";
 import prisma from "@/app/lib/db/prisma";
+import { revalidatePath } from "next/cache";
 
 export type OccurrenceWithAgent = AgentOccurance & { foreignAgent: ForeignAgent }
 
@@ -17,4 +20,19 @@ export async function getReportOccurrences(reportId: number): Promise<Occurrence
             }
         }
     });
+}
+
+export async function updateReportsOrder(newReports: Report[]) {
+    for (const report of newReports) {
+        const index = newReports.indexOf(report);
+        await prisma?.report.update({
+            where: {
+                id: report.id,
+            },
+            data: {
+                order: index,
+            }
+        })
+    }
+    revalidatePath("/app/reports");
 }

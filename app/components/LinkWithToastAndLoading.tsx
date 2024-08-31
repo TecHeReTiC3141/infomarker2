@@ -31,7 +31,7 @@ export function LinkWithToastAndLoading({ children, href, className }: LinkWithT
             setLoadingTimeout(setTimeout(
                 () => toast.loading("Возможна задержка при первом переходе на страницу, но при последующих ее не будет наблюдаться",
                     { duration: 3000 },
-                ), 1000));
+                ), 1500));
         }} className={clsx(className, "group",  loading && "loading-link")}>
             {children}
         </Link>
