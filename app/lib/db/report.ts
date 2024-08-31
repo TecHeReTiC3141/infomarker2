@@ -3,21 +3,22 @@
 import prisma from "@/app/lib/db/prisma";
 import { getServerSession, Session } from "next-auth";
 import { authOptions } from "@/app/lib/config/authOptions";
-import { Report, User, UserRole } from "@prisma/client";
+import { Report } from "@prisma/client";
 import { generateRandomHexColor } from "@/app/utils/occuranceColors";
+import { revalidatePath } from "next/cache";
 
 interface createReportData {
     filename: string;
     text: string;
 }
 
-function countOccurrences(full_text: string, variant: string) {
+function countOccurrences(fullText: string, variant: string) {
     // Escape special characters in the substring and create a regular expression
     const escapedSubStr = variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedSubStr, 'gi');
 
     // Use match() with the regular expression to find all occurrences
-    const matches = full_text.match(regex);
+    const matches = fullText.match(regex);
 
     // Return the number of matches found
     return matches?.length || 0;
@@ -77,7 +78,8 @@ export async function createReport(data: createReportData) {
             }
         })
     ]);
-    await fillAgentOccurrences(data, id);
+    revalidatePath("/app/reports");
+    fillAgentOccurrences(data, id);
     return id;
 }
 
@@ -100,6 +102,9 @@ export async function getUserReports(userId: number): Promise<Report[]> {
     return prisma.report.findMany({
         where: {
             userId,
+        },
+        orderBy: {
+            order: "asc",
         }
     });
 }
@@ -115,5 +120,22 @@ export async function recreateAgentOccurrences(reportId: number) {
         return;
     }
     await fillAgentOccurrences(report, reportId);
+}
 
+export async function deleteReportById(reportId: number) {
+    return prisma.report.delete({
+        where: {
+            id: reportId,
+        }
+    });
+}
+
+export async function updateReportById(reportId: number, updateData: Partial<Report>) {
+    await prisma.report.update({
+        where: {
+            id: reportId,
+        },
+        data: updateData,
+    });
+    revalidatePath("/app/reports");
 }

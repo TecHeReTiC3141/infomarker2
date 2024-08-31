@@ -23,8 +23,8 @@ export default function UserDropdown() {
                 <div className="flex items-center gap-x-6">
                     <div className="text-right">
                         <p className="font-bold">{user?.name}</p>
-                        <p className={clsx("text-sm", user?.role !== "ADMIN" && user?.checksLeft === 0 && "text-error")}>Отправок
-                            осталось: {user?.role === "ADMIN" ? <FaInfinity/> : user?.checksLeft}</p>
+                        {/*<p className={clsx("text-sm", user?.role !== "ADMIN" && user?.checksLeft === 0 && "text-error")}>Отправок*/}
+                        {/*    осталось: {user?.role === "ADMIN" ? <FaInfinity/> : user?.checksLeft}</p>*/}
                     </div>
 
                     <div tabIndex={0} role="button"

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { SessionUser } from "@/app/lib/db/user";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 
 export default function DocumentDroparea() {
@@ -72,16 +73,19 @@ export default function DocumentDroparea() {
         }
     }
 
+    // TODO: try to deal with 504 error
     async function handleUpload() {
         if (!file) return;
         setIsLoading(true);
         try {
             const newReportId = await extractTextFromFile(file);
-            router.push(`/app/reports/${newReportId}`);
+            toast.loading("Файл успешно загружен, теперь мы ищем иноагентов в тексте", { duration: 15000 });
+            setTimeout(() => {
+                setIsLoading(false);
+                router.push(`/app/reports/${newReportId}`);
+            }, 15000);
         } catch (err) {
             setError((err as Error).message);
-        } finally {
-            setIsLoading(false);
         }
     }
 

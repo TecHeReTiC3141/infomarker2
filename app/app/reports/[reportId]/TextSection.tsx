@@ -10,6 +10,25 @@ interface TextSectionProps {
     activeOccurSection: keyof typeof occurVariants,
 }
 
+function findMatches(regex: RegExp, textToHighlight: string, chunks: Chunk[]) {
+    let match;
+    while ((match = regex.exec(textToHighlight))) {
+        let start = match.index
+        let end = regex.lastIndex
+        // We do not return zero-length matches
+        if (end > start) {
+            chunks.push({ start, end })
+        }
+
+        // Prevent browsers like Firefox from getting stuck in an infinite loop
+        // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
+        if (match.index === regex.lastIndex) {
+            regex.lastIndex++
+        }
+    }
+    return chunks;
+}
+
 const TextSection = forwardRef(function TextSection({
                                                         text,
                                                         occurrences,
@@ -20,47 +39,21 @@ const TextSection = forwardRef(function TextSection({
 
         const allSearchWords: string[] = occurrences?.flatMap(item => item.foundVariants) || [];
 
-        const findChunksExplicit = ({
-                                        autoEscape,
-                                        caseSensitive,
-                                        searchWords,
-                                        textToHighlight
-                                    }: FindChunks): Array<Chunk> => {
+        function findChunksExplicit({ autoEscape, caseSensitive, searchWords, textToHighlight }: FindChunks): Array<Chunk> {
 
-
-            return searchWords
+            return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
+                .map(searchWord => autoEscape ? escapeRegExpFn(searchWord) : searchWord)
                 .reduce((chunks, searchWord) => {
-                        if (autoEscape) {
-                            searchWord = escapeRegExpFn(searchWord)
-                        }
-
                         // Any word that starts with search word and ends with whitespace
                         const regex = new RegExp(`(?<=^|\\s|\\t)${searchWord}(?=\\s|\\t|$)`,
-                            caseSensitive ? 'g' : 'gi')
+                            caseSensitive ? 'g' : 'gi');
 
-                        let match
-                        while ((match = regex.exec(textToHighlight))) {
-                            let start = match.index
-                            let end = regex.lastIndex
-                            // We do not return zero-length matches
-                            if (end > start) {
-                                chunks.push({ start, end })
-                            }
-
-                            // Prevent browsers like Firefox from getting stuck in an infinite loop
-                            // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
-                            if (match.index === regex.lastIndex) {
-                                regex.lastIndex++
-                            }
-                        }
-
-                        return chunks
+                        return findMatches(regex, textToHighlight, chunks);
                     },
-                    [] as Chunk[])
+                    [] as Chunk[]);
         }
-        console.log(allSearchWords);
-        // Кастомная функция для поиска целых слов
+
         const findChunks = ({ textToHighlight }: FindChunks) => {
             const chunks = [];
             const regex = new RegExp(`(?<=[\\^\\s!,.-])${allSearchWords.join('|')}(?=[$\\s!?,.-])`, 'gi');
@@ -84,34 +77,15 @@ const TextSection = forwardRef(function TextSection({
                                    }: FindChunks): Array<Chunk> => {
 
 
-            return searchWords
+            return allSearchWords
                 .filter(searchWord => searchWord) // Remove empty words
+                .map(searchWord => autoEscape ? escapeRegExpFn(searchWord) : searchWord)
                 .reduce((chunks, searchWord) => {
-                        if (autoEscape) {
-                            searchWord = escapeRegExpFn(searchWord)
-                        }
-
                         // Any word that starts with search word and ends with whitespace
                         const regex = new RegExp(`${searchWord}`,
                             caseSensitive ? 'g' : 'gi')
 
-                        let match
-                        while ((match = regex.exec(textToHighlight))) {
-                            let start = match.index
-                            let end = regex.lastIndex
-                            // We do not return zero-length matches
-                            if (end > start) {
-                                chunks.push({ start, end })
-                            }
-
-                            // Prevent browsers like Firefox from getting stuck in an infinite loop
-                            // See http://www.regexguru.com/2008/04/watch-out-for-zero-length-matches/
-                            if (match.index === regex.lastIndex) {
-                                regex.lastIndex++
-                            }
-                        }
-
-                        return chunks
+                        return findMatches(regex, textToHighlight, chunks);
                     },
                     [] as Chunk[])
         }
@@ -122,8 +96,7 @@ const TextSection = forwardRef(function TextSection({
                 <p ref={ref} id="report-text" className="w-full mb-3 text-wrap whitespace-pre-line break-words">
                     <Highlighter searchWords={Array.of(...allSearchWords)} highlightStyle={{ background: "red" }}
                                  findChunks={activeOccurSection == "found" ? findChunksExplicit : findChunksDefault}
-                        // If the search will be case intensive then uncomment next line
-                        //          caseSensitive={activeOccurSection == "found"}
+                                 caseSensitive={activeOccurSection == "found"}
                                  activeIndex={activeIndex} activeClassName="active"
                                  textToHighlight={text.replace(/\n{2,}/g, '\n').trim()}/>
                 </p>
@@ -132,7 +105,7 @@ const TextSection = forwardRef(function TextSection({
     }
 )
 
-function escapeRegExpFn(string: string | RegExp): string | RegExp {
+function escapeRegExpFn(string: string): string {
     if (typeof string !== "string")
         return string
     return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')

@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
+import { LinkWithToastAndLoading } from "@/app/components/LinkWithToastAndLoading";
 
 export interface SectionButtonProps {
     text: string,
@@ -12,21 +12,24 @@ export interface SectionButtonProps {
 
 export default function SectionButton({ text, section, disabled = false }: SectionButtonProps) {
     const pathname = usePathname();
-    // TODO: add spinner when clicked before redirecting
-    // TODO: add text that app can be slow during first redirect to page
+    // TODO: make custom link component which triggers toast message
 
     const isActive = pathname.includes(section);
 
     return (
-        <Link href={`/app/${section}`} onClick={event => {
-            if (disabled) {
-                event.preventDefault();
-                return;
+        <>
+            {
+                disabled ?
+                    <button disabled
+                            className={"btn btn-primary btn-lg w-40 lg:w-48 xl:w-56 justify-start"}>{text}</button>
+                    :
+                    <LinkWithToastAndLoading href={`/app/${section}`}
+                          className={clsx("btn btn-lg w-40 lg:w-48 xl:w-56 justify-between items-center",
+                              isActive ? "btn-primary" : "btn-neutral")}>
+                        {text}
+                        <span className="hidden group-[.loading-link]:inline loading loading-spinner text-sm" />
+                    </LinkWithToastAndLoading>
             }
-        }}
-              className={clsx("btn btn-lg w-40 lg:w-48 xl:w-56 justify-start", isActive ? "btn-primary" : "btn-neutral",
-                  disabled && "opacity-75 cursor-default")}>
-            {text}
-        </Link>
+        </>
     )
 }
