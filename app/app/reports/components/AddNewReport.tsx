@@ -1,5 +1,3 @@
-import FileIcon from "@/app/app/load-document/components/FileIcon";
-import { MdEdit } from "react-icons/md";
 import Link from "next/link";
 import { BsFileEarmarkArrowUp } from "react-icons/bs";
 

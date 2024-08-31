@@ -81,6 +81,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
 
     // effect for calculating of agent indexes and occurrences
     useEffect(() => {
+        console.log("in setting up", activeOccurSection, occurrences);
         const marks = textSectionRef.current?.querySelectorAll("mark") || [];
         agentIndexes.current = {};
         for (let i = 0; i < marks.length; ++i) {
@@ -88,10 +89,13 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
             occurLoop:
                 for (let occurrence of (occurrences || [])) {
                     const { foreignAgent, foundVariants } = occurrence;
+
                     const lengthSortReversed = (a: string, b: string) => (a.length > b.length ? -1 : 1)
                     const sortedVariants = foundVariants.toSorted(lengthSortReversed);
                     for (let variant of sortedVariants) {
                         if (mark.textContent === variant) {
+                            console.log(foreignAgent.name, foreignAgent.id);
+                            mark.classList.add("foreign-agent");
                             agentIndexes.current[ foreignAgent.id ] = [ ...(agentIndexes.current[ foreignAgent.id ] || []), i ];
                             let curIndex = agentIndexes.current[ foreignAgent.id ].length - 1;
                             mark.dataset.index = curIndex.toString();
@@ -101,6 +105,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                         }
                     }
                 }
+                mark.style.background = "none";
         }
         console.log("agentIndexes", agentIndexes);
         console.log("agentOccurCounts", agentOccurCounts);
@@ -126,7 +131,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
         [ agentOccurCounts, occurrences ]);
 
     function setMarkStyles(ref: RefObject<HTMLDivElement>, occurrences: OccurrenceWithAgent[] | undefined, interactive: boolean) {
-        const marks = ref.current?.querySelectorAll("mark") || [];
+        const marks = (ref.current?.querySelectorAll("mark.foreign-agent") || []) as NodeListOf<HTMLElement>;
         for (let i = 0; i < marks.length; ++i) {
             const mark = marks[ i ];
             occurLoop:
@@ -185,7 +190,7 @@ export default function ReportSection({ report, occurrences }: ReportSectionProp
                     <Link href="/app/reports" className="flex gap-x-2 text-sm items-center hover:underline">
                         <FaArrowLeftLong size={16}/> Назад
                     </Link>
-                    <h3 className="text-xl font-bold">Отчет по файлу {report.filename}</h3>
+                    <h3 className="text-xl font-bold">Отчет {report.name || `по файлу ${report.filename}`}</h3>
                     <div className="tooltip tooltip-bottom absolute right-1 top-1" data-tip="Скачать PDF">
                         <button className=" btn btn-circle btn-ghost" onClick={generatePdf}>
                             {pdfReportInProgress ? <span className="loading loading-spinner text-xl"/> :

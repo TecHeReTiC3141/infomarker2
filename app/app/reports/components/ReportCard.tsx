@@ -1,10 +1,9 @@
 import FileIcon from "@/app/app/load-document/components/FileIcon";
 import Link from "next/link";
 import { Report } from "@prisma/client";
-import { MdEdit } from "react-icons/md";
+import { MdDragHandle, MdEdit } from "react-icons/md";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { LinkWithToastAndLoading } from "@/app/components/LinkWithToastAndLoading";
-import { MdDragHandle } from "react-icons/md";
+import { useState } from "react";
 
 
 interface ReportCardProps {
@@ -13,15 +12,20 @@ interface ReportCardProps {
 
 export default function ReportCard({ report }: ReportCardProps) {
 
-    const searchParams= useSearchParams();
+
+    const [ isLoading, setIsLoading ] = useState<boolean>(false);
+
+    const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
 
     return (
-        <LinkWithToastAndLoading href={`/app/reports/${report.id}`}
-                                 className="rounded-lg bg-base-200 hover:bg-base-300 transition-colors duration-300 px-4 pb-3 pt-4 group cursor-pointer shadow relative select-none">
+        <Link href={`/app/reports/${report.id}`} onClick={() => setIsLoading(true)}
+              className="rounded-lg bg-base-200 hover:bg-base-300 transition-colors duration-300 px-4 pb-3 pt-4 group cursor-pointer shadow relative select-none">
             <div className="w-48 h-48 bg-base-100 flex items-center justify-center rounded-lg">
-                <FileIcon filename={report.filename}/>
+                {isLoading ? <span className="loading loading-spinner loading-lg" />
+                    : <FileIcon filename={report.filename}/>
+                }
             </div>
             <h5 className="font-bold mt-2 break-all max-w-48">{report.name || report.filename}</h5>
             <button
@@ -43,6 +47,6 @@ export default function ReportCard({ report }: ReportCardProps) {
                 }}>
                 <MdDragHandle size={14}/>
             </button>
-        </LinkWithToastAndLoading>
+        </Link>
     )
 }
