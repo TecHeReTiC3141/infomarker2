@@ -29,9 +29,7 @@ export default async function ReportsPage({ searchParams: { selectedReportId } }
             {
                 reports.length ?
                     <>
-
                         <ReportList initialReports={reports} />
-                        <AddNewReport />
                         <SelectedReportModal selectedReport={selectedReport}/>
                     </> :
                     <h2 className="text-xl font-bold">У вас нет отчетов. <Link href="/app/load-document"
